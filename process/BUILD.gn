@@ -41,6 +41,8 @@ ohos_shared_library("process") {
   }
   subsystem_name = "ccruntime"
   part_name = "jsapi_sys"
+
+  relative_install_dir = "module"
 }
 
 group("process_packages") {
