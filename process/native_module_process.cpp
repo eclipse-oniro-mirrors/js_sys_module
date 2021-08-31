@@ -110,7 +110,7 @@ namespace OHOS::Js_sys_module::Process {
 
         ChildProcess* object = nullptr;
         NAPI_CALL(env, napi_unwrap(env, thisVar, reinterpret_cast<void**>(&object)));
-        napi_value result = object->Wait(); 
+        napi_value result = object->Wait();
 
         return result;
     }
@@ -423,6 +423,19 @@ namespace OHOS::Js_sys_module::Process {
         return res;
     }
 
+    napi_value Off(napi_value str);
+    static napi_value Off(napi_env env, napi_callback_info info)
+    {
+        napi_value thisVar = nullptr;
+        size_t argc = 1;
+        napi_value args = nullptr;
+        napi_get_cb_info(env, info, &argc, &args, &thisVar, nullptr);
+        Process* object = nullptr;
+        NAPI_CALL(env, napi_unwrap(env, thisVar, (void**)&object));
+        napi_value result = object->Off(args);
+        return result;
+    }
+
     static napi_value Uptime(napi_env env, napi_callback_info info)
     {
         napi_value thisVar = nullptr;
@@ -464,6 +477,7 @@ namespace OHOS::Js_sys_module::Process {
             DECLARE_NAPI_FUNCTION("abort", Abort),
             DECLARE_NAPI_FUNCTION("cwd", Cwd),
             DECLARE_NAPI_FUNCTION("on", On),
+            DECLARE_NAPI_FUNCTION("off", Off),
             DECLARE_NAPI_FUNCTION("exit", Exit),
         };
         NAPI_CALL(env, napi_define_class(env, processClassName, strlen(processClassName), ProcessConstructor,

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "js_process.h" 
+#include "js_process.h"
 
 #include <ctime>
 #include <vector>
@@ -69,7 +69,7 @@ napi_value Process::GetEGid() const
 napi_value Process::GetGroups() const
 {
     napi_value result = nullptr;
-    int progroups = getgroups(0, nullptr); 
+    int progroups = getgroups(0, nullptr);
     if (progroups == -1) {
         napi_throw_error(env, "-1", "getgroups initialize failed");
     }
@@ -128,10 +128,12 @@ void Process::Chdir(napi_value args) const
         napi_throw_error(env, "-2", "prolen is error !");
     }
     napi_get_value_string_utf8(env, args, path, prolen + 1, &prolen);
-    int proerr = uv_chdir(path);
+    int proerr = 0;
     if (path != nullptr) {
+        proerr = uv_chdir(path);
         delete []path;
     }
+
     if (proerr) {
         napi_throw_error(env, "-1", "chdir");
     }
@@ -211,9 +213,36 @@ void Process::On(napi_value str, napi_value function)
         buffer = new char[bufferSize + 1];
     }
     napi_get_value_string_utf8(env, str, buffer, bufferSize + 1, &bufferSize);
-    map_event_[buffer] = function;
     if (buffer != nullptr) {
+        map_event_[buffer] = function;
         delete []buffer;
     }
+}
+napi_value Process::Off(napi_value str)
+{
+    char *buffer = nullptr;
+    size_t bufferSize = 0;
+    bool flag = true;
+    napi_value result = nullptr;
+    napi_get_value_string_utf8(env, str, buffer, 0, &bufferSize);
+    if (bufferSize > 0) {
+        buffer = new char[bufferSize + 1];
+    }
+    napi_get_value_string_utf8(env, str, buffer, bufferSize + 1, &bufferSize);
+    std::string temp = buffer;
+    if (buffer != nullptr) {
+        delete[] buffer;
+    }
+    for (auto iter = map_event_.cbegin(); iter != map_event_.cend(); ++iter) {
+        if (iter->first == temp) {
+            map_event_.erase(temp);
+            NAPI_CALL(env, napi_get_boolean(env, flag, &result));
+            return result;
+        }
+    }
+    flag = false;
+    NAPI_CALL(env, napi_get_boolean(env, flag, &result));
+    return result;
+
 }
 }

@@ -58,6 +58,10 @@
 
 该process.cwd()方法返回 Node.js 进程的当前工作目录。
 
+15.off(type: string): boolean;
+
+该process.off()方法会清除用户存储的事件。
+
 process 使用方法
 import { Process } from '@ohos.process' export default { data: { title: "" },
 
@@ -127,6 +131,12 @@ on(){
     }
     var proc = new Process();
     proc.on("add",add);
+},
+
+off(){
+    var pro = new Process();
+    var result = pro.off("add");
+    console.log("--------"+result);
 },
 
 Cwd(){

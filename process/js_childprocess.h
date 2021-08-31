@@ -18,7 +18,6 @@
 
 #include <string>
 #include <unistd.h>
-
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 namespace OHOS::Js_sys_module::Process {

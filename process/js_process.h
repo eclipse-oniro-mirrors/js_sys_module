@@ -25,7 +25,7 @@ namespace OHOS::Js_sys_module::Process {
 class Process {
 public:
     explicit Process(napi_env env);
-    virtual~Process(){} 
+    virtual~Process() {}
     napi_value GetUid() const;
     napi_value GetGid() const;
     napi_value GetEUid() const;
@@ -36,13 +36,14 @@ public:
     void Chdir(napi_value args) const;
     napi_value Uptime() const;
     napi_value Kill(napi_value proid, napi_value signal);
-    void Abort()const;
+    void Abort() const;
     void On(napi_value str, napi_value function);
-    void Exit(napi_value number)const;
-    napi_value Cwd()const;      
+    napi_value Off(napi_value str);
+    void Exit(napi_value number) const;
+    napi_value Cwd() const;      
 private:
     napi_env env;
-    std::map<std::string, napi_value> map_event_;       
+    std::map<std::string, napi_value> map_event_;
 };
 }
 #endif

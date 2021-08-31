@@ -58,6 +58,10 @@ The process. Exit () method will cause the node. JS process to exit immediately.
 
 The process. Cwd () method returns the current working directory of the node. JS process.
 
+15.off(type:string) :boolean;
+
+The process. off () Clear user-stored function events.
+
 #### process usage method
 import { Process } from '@ohos.process' export default { data: { title: "" },
 
@@ -127,6 +131,12 @@ on(){
     }
     var proc = new Process();
     proc.on("add",add);
+},
+
+off(){
+    var pro = new Process();
+    var result =  pro.off("add");
+    console.log("---------"+result);
 },
 
 Cwd(){
