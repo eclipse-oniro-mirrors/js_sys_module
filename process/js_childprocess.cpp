@@ -17,14 +17,16 @@
 
 #include <map>
 #include <vector>
+
 #include <csignal>
 #include <cstdlib>
 #include <sys/stat.h>
-#include <sys/wait.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 #include "securec.h"
 #include "utils/log.h"
+
 namespace OHOS::Js_sys_module::Process {
     std::map<std::string, int> g_signalsMap = {
         {"SIGHUP", 1},
@@ -204,7 +206,7 @@ namespace OHOS::Js_sys_module::Process {
         auto stdOutInfo = reinterpret_cast<StdInfo*>(data);
         char childStdout[MAXSIZE] = {0};
         while (*(stdOutInfo->isNeedRun)) {
-            read(stdOutInfo->fd, childStdout, sizeof(childStdout));
+            read(stdOutInfo->fd, childStdout, sizeof(childStdout) - 1);
             if (strlen(childStdout) > 0) {
                 stdOutInfo->stdData += childStdout;
             }
@@ -249,7 +251,7 @@ namespace OHOS::Js_sys_module::Process {
         auto stdErrInfo = reinterpret_cast<StdInfo*>(data);
         char childStderr[MAXSIZE] = {0};
         while (*(stdErrInfo->isNeedRun)) {
-            read(stdErrInfo->fd, childStderr, sizeof(childStderr));
+            read(stdErrInfo->fd, childStderr, sizeof(childStderr) - 1);
             if (strlen(childStderr) > 0) {
                 stdErrInfo->stdData += childStderr;
             }
