@@ -112,7 +112,7 @@ namespace OHOS::Js_sys_module::Process {
     {
         napi_value promise = nullptr;
         auto waitInfo = new WaitInfo;
-        NAPI_CALL(env_, napi_create_promise(env_, &(waitInfo->deferred), &promise));
+        napi_create_promise(env_, &(waitInfo->deferred), &promise);
 
         if (isWait_) {
             int32_t status;
@@ -122,8 +122,8 @@ namespace OHOS::Js_sys_module::Process {
         }
         isNeedRun_ = false;
         napi_value result = nullptr;
-        NAPI_CALL(env_, napi_create_int32(env_, exitCode_, &result));
-        NAPI_CALL(env_, napi_resolve_deferred(env_, waitInfo->deferred, result));
+        napi_create_int32(env_, exitCode_, &result);
+        napi_resolve_deferred(env_, waitInfo->deferred, result);
         delete waitInfo;
         waitInfo = nullptr;
 
