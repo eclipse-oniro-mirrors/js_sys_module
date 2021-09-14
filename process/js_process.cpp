@@ -21,17 +21,22 @@
 #include <grp.h>
 #include <pwd.h>
 #include <uv.h>
+#include <sched.h>
+#include <pthread.h>
 
 #include <sys/sysinfo.h>
 #include <sys/types.h>
+#include <sys/types.h>
+#include <sys/syscall.h>
 #include <unistd.h>
+#include <cstdlib>
 
 #include "securec.h"
 #include "utils/log.h"
 namespace OHOS::Js_sys_module::Process {
     namespace {
         constexpr int NUM_OF_DATA = 4;
-        constexpr int MAX_PATH = 260;
+        constexpr int PER_USER_RANGE = 100000;
     }
     std::map<std::string, napi_value> Process::m_map_process_event_;
     Process::Process(napi_env env_) : env(env_) {}
@@ -190,7 +195,7 @@ namespace OHOS::Js_sys_module::Process {
     napi_value Process::Cwd() const
     {
         napi_value result = nullptr;
-        char buf[MAX_PATH * NUM_OF_DATA] = { 0 };
+        char buf[260 * NUM_OF_DATA] = { 0 }; // 260:Only numbers path String size is 260.
         size_t length = sizeof(buf);
         int err = uv_cwd(buf, &length);
         if (err) {
@@ -220,6 +225,7 @@ namespace OHOS::Js_sys_module::Process {
             buffer = nullptr;
         }
     }
+
     napi_value Process::Off(napi_value str)
     {
         char *buffer = nullptr;
@@ -246,6 +252,174 @@ namespace OHOS::Js_sys_module::Process {
         }
         flag = false;
         NAPI_CALL(env, napi_get_boolean(env, flag, &result));
+        return result;
+    }
+
+    napi_value Process::GetTid() const
+    {
+        napi_value result = nullptr;
+        auto proTid = static_cast<int32_t>(gettid());
+        napi_create_int32(env, proTid, &result);
+        return result;
+    }
+
+    napi_value Process::IsIsolatedProcess() const
+    {
+        napi_value result = nullptr;
+        bool flag = true;
+        auto prouid = static_cast<int32_t>(getuid());
+        auto uid = prouid % PER_USER_RANGE;
+        if ((uid >= 99000 && uid <= 99999) || // 99999:Only isolateuid numbers between 99000 and 99999.
+            (uid >= 9000 && uid <= 98999)) { // 98999:Only appuid numbers betweeen 9000 and 98999.
+            NAPI_CALL(env, napi_get_boolean(env, flag, &result));
+            return result;
+        }
+        flag = false;
+        NAPI_CALL(env, napi_get_boolean(env, flag, &result));
+        return result;
+    }
+
+    napi_value Process::IsAppUid(napi_value uid) const
+    {
+        int32_t number = 0;
+        napi_value result = nullptr;
+        bool flag = true;
+        napi_get_value_int32(env, uid, &number);
+        if (number > 0) {
+            const auto appId = number % PER_USER_RANGE;
+            if (appId >= FIRST_APPLICATION_UID && appId <= LAST_APPLICATION_UID) {
+                napi_get_boolean(env, flag, &result);
+                return result;
+            }
+            flag = false;
+            NAPI_CALL(env, napi_get_boolean(env, flag, &result));
+            return result;
+        } else {
+            flag = false;
+            NAPI_CALL(env, napi_get_boolean(env, flag, &result));
+            return result;
+        }
+    }
+
+    napi_value Process::Is64Bit() const
+    {
+        napi_value result = nullptr;
+        bool flag = true;
+        int32_t* number = nullptr;
+        auto size = sizeof(number);
+        if (size == NUM_OF_DATA) {
+            flag = false;
+            NAPI_CALL(env, napi_get_boolean(env, flag, &result));
+            return result;
+        } else {
+            NAPI_CALL(env, napi_get_boolean(env, flag, &result));
+            return result;
+        }
+    }
+
+    napi_value Process::GetUidForName(napi_value name) const
+    {
+        struct passwd *user;
+        int32_t uid = 0;
+        napi_value result = nullptr;
+        char *buffer = nullptr;
+        size_t bufferSize = 0;
+        napi_get_value_string_utf8(env, name, buffer, 0, &bufferSize);
+        if (bufferSize > 0) {
+            buffer = new char[bufferSize + 1];
+        }
+        napi_get_value_string_utf8(env, name, buffer, bufferSize + 1, &bufferSize);
+        std::string temp = "";
+        if (buffer != nullptr) {
+            temp = buffer;
+            delete []buffer;
+            buffer = nullptr;
+        }
+        user = getpwnam(temp.c_str());
+        if (user != nullptr) {
+            uid = static_cast<int32_t>(user->pw_uid);
+            napi_create_int32(env, uid, &result);
+            return result;
+        }
+        napi_create_int32(env, (-1), &result);
+        return result;
+    }
+
+    napi_value Process::GetThreadPriority(napi_value tid) const
+    {
+        errno = 0;
+        int32_t proTid = 0;
+        napi_value result = nullptr;
+        napi_get_value_int32(env, tid, &proTid);
+        int32_t pri = getpriority(PRIO_PROCESS, proTid);
+        if (errno != 0) {
+            napi_throw_error(env, "-1", "Invalid tid");
+        }
+        napi_create_int32(env, pri, &result);
+        return result;
+    }
+
+    napi_value Process::GetStartRealtime() const
+    {
+        struct timespec timespro;
+        struct timespec timessys;
+        napi_value result = nullptr;
+        auto res = clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &timespro);
+        if (res != 0) {
+            return 0;
+        }
+        auto res1 = clock_gettime(CLOCK_MONOTONIC, &timessys);
+        if (res1 != 0) {
+            return 0;
+        }
+        double whenpro = ConvertTime(timespro.tv_sec, timespro.tv_nsec);
+        double whensys = ConvertTime(timessys.tv_sec, timessys.tv_nsec);
+        auto timedif = (whensys - whenpro);
+        napi_create_double(env, timedif, &result);
+        return result;
+    }
+
+    napi_value Process::GetAvailableCores() const
+    {
+        napi_value result = nullptr;
+        auto num_cpus = static_cast<int32_t>(sysconf(_SC_NPROCESSORS_ONLN));
+        NAPI_CALL(env, napi_create_array(env, &result));
+        for (int i = 0; i <= num_cpus; i++) {
+            napi_value numvalue = nullptr;
+            napi_create_uint32(env, i, &numvalue);
+            napi_status status = napi_set_element(env, result, i, numvalue);
+            if (status != napi_ok) {
+                HILOG_INFO("set element error");
+            }
+        }
+        return result;
+    }
+
+    double Process::ConvertTime(time_t tvsec, long tvnsec) const
+    {
+        return double(tvsec * 1000) + double(tvnsec / 1000000); // 98999:Only converttime numbers is 1000 and 1000000.
+    }
+
+    napi_value Process::GetPastCputime() const
+    {
+        struct timespec times;
+        napi_value result = nullptr;
+        auto res = clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &times);
+        if (res != 0) {
+            return 0;
+        }
+        double when =  ConvertTime(times.tv_sec, times.tv_nsec);
+        napi_create_double(env, when, &result);
+        return result;
+    }
+
+    napi_value Process::GetSystemConfig(napi_value name)
+    {
+        int32_t number = 0;
+        napi_value result = nullptr;
+        napi_get_value_int32(env, name, &number);
+        auto configinfo = static_cast<int32_t>(sysconf(number));
+        napi_create_int32(env, configinfo, &result);
         return result;
     }
 }
