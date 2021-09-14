@@ -305,8 +305,7 @@ namespace OHOS::Js_sys_module::Process {
     {
         napi_value result = nullptr;
         bool flag = true;
-        char *number = nullptr;
-        auto size = sizeof(number);
+        auto size = sizeof(char*);
         if (size == NUM_OF_DATA) {
             flag = false;
             NAPI_CALL(env, napi_get_boolean(env, flag, &result));
