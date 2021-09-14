@@ -305,7 +305,7 @@ namespace OHOS::Js_sys_module::Process {
     {
         napi_value result = nullptr;
         bool flag = true;
-        int32_t *number = nullptr;
+        char *number = nullptr;
         auto size = sizeof(number);
         if (size == NUM_OF_DATA) {
             flag = false;
