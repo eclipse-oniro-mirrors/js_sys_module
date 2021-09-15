@@ -373,6 +373,93 @@ namespace OHOS::Js_sys_module::Process {
         result = object.Kill(argv[0], argv[1]);
         return result;
     }
+    static napi_value GetTid(napi_env env, napi_callback_info info)
+    {
+        Process object(env);
+        return object.GetTid();
+    }
+
+    static napi_value IsIsolatedProcess(napi_env env, napi_callback_info info)
+    {
+        Process object(env);
+        return object.IsIsolatedProcess();
+    }
+
+    static napi_value IsAppUid(napi_env env, napi_callback_info info)
+    {
+        napi_value thisVar = nullptr;
+        size_t argc = 1;
+        napi_value args = nullptr;
+        napi_get_cb_info(env, info, &argc, &args, &thisVar, nullptr);
+        napi_valuetype valuetype;
+        NAPI_CALL(env, napi_typeof(env, args, &valuetype));
+        NAPI_ASSERT(env, valuetype == napi_number, "Wrong argument type.String error");
+        Process object(env);
+        return object.IsAppUid(args);
+    }
+
+    static napi_value Is64Bit(napi_env env, napi_callback_info info)
+    {
+        Process object(env);
+        return object.Is64Bit();
+    }
+
+    static napi_value GetUidForName(napi_env env, napi_callback_info info)
+    {
+        napi_value thisVar = nullptr;
+        size_t argc = 1;
+        napi_value args = nullptr;
+        napi_get_cb_info(env, info, &argc, &args, &thisVar, nullptr);
+        napi_valuetype valuetype;
+        NAPI_CALL(env, napi_typeof(env, args, &valuetype));
+        NAPI_ASSERT(env, valuetype == napi_string, "Wrong argument type.String error");
+        Process object(env);
+        return object.GetUidForName(args);
+    }
+
+    static napi_value GetThreadPriority(napi_env env, napi_callback_info info)
+    {
+        napi_value thisVar = nullptr;
+        size_t argc = 1;
+        napi_value args = nullptr;
+        napi_get_cb_info(env, info, &argc, &args, &thisVar, nullptr);
+        napi_valuetype valuetype;
+        NAPI_CALL(env, napi_typeof(env, args, &valuetype));
+        NAPI_ASSERT(env, valuetype == napi_number, "Wrong argument type.String error");
+        Process object(env);
+        return object.GetThreadPriority(args);
+    }
+
+    static napi_value GetStartRealtime(napi_env env, napi_callback_info info)
+    {
+        Process object(env);
+        return object.GetStartRealtime();
+    }
+
+    static napi_value GetPastCputime(napi_env env, napi_callback_info info)
+    {
+        Process object(env);
+        return object.GetPastCputime();
+    }
+
+    static napi_value GetSystemConfig(napi_env env, napi_callback_info info)
+    {
+        napi_value thisVar = nullptr;
+        size_t argc = 1;
+        napi_value args = nullptr;
+        napi_get_cb_info(env, info, &argc, &args, &thisVar, nullptr);
+        napi_valuetype valuetype;
+        NAPI_CALL(env, napi_typeof(env, args, &valuetype));
+        NAPI_ASSERT(env, valuetype == napi_number, "Wrong argument type.String error");
+        Process object(env);
+        return object.GetSystemConfig(args);
+    }
+
+    static napi_value GetAvailableCores(napi_env env, napi_callback_info info)
+    {
+        Process object(env);
+        return object.GetAvailableCores();
+    }
 
     static napi_value Init(napi_env env, napi_value exports)
     {
@@ -393,6 +480,16 @@ namespace OHOS::Js_sys_module::Process {
             DECLARE_NAPI_FUNCTION("on", On),
             DECLARE_NAPI_FUNCTION("off", Off),
             DECLARE_NAPI_FUNCTION("exit", Exit),
+            DECLARE_NAPI_FUNCTION("getTid", GetTid),
+            DECLARE_NAPI_FUNCTION("getStartRealtime", GetStartRealtime),
+            DECLARE_NAPI_FUNCTION("getAvailableCores", GetAvailableCores),
+            DECLARE_NAPI_FUNCTION("getPastCputime",  GetPastCputime),
+            DECLARE_NAPI_FUNCTION("isIsolatedProcess", IsIsolatedProcess),
+            DECLARE_NAPI_FUNCTION("is64Bit", Is64Bit),
+            DECLARE_NAPI_FUNCTION("isAppUid", IsAppUid),
+            DECLARE_NAPI_FUNCTION("getUidForName", GetUidForName),
+            DECLARE_NAPI_FUNCTION("getThreadPriority", GetThreadPriority),
+            DECLARE_NAPI_FUNCTION("getSystemConfig", GetSystemConfig),
         };
         NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
         return exports;
