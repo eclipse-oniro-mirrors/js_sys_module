@@ -1,226 +1,292 @@
-#### js_sys_module
-#### 一、process 介绍
-主要是获取进程的相关id以及获取和修改进程的工作目录，及进程的退出关闭。 process进程模块，涉及14个接口。 
+# js_sys_module Subsystems/Components
 
-1.getUid() :number;
+-   [Introduction](#Introduction)
+-   [Directory](#Directory)
+-   [Description](#Description)
+    -   [Interface description](#Interface description)
+    -   [Interface instructions](#Interface instructions)
 
-该process.getuid()方法返回进程的数字用户标识。
+-   [Related warehouse]](#Related warehouse])
 
-2.getGid() :number;
+## Introduction
+Process is mainly used to obtain the relevant ID of the process, obtain and modify the working directory of the process, exit and close the process. The childprocess object can be used to create a new process. The main process can obtain the standard input and output of the child process, send signals and close the child process. 
+## Directory
 
-该process.getgid()方法返回进程的数字组标识。
+```
+base/compileruntime/js_sys_module/
+├── Class:PROCESS                   # class of PROCESS
+├── Uid                             # attribute of Uid
+├── Gid                             # attribute of Gid
+├── EUid                            # attribute of EUid
+├── EGid                            # attribute of EGid
+├── Groups                          # attribute of Groups
+├── Pid                             # attribute of Pid
+├── Ppid                            # attribute of Ppid
+├── chdir()                         # method of chdir
+├── uptime()                        # method of uptime
+├── kill()                          # method of kill
+├── abort()                         # method of abort
+├── on()                            # method of on
+├── exit()                          # method of exit
+├── cwd()                           # method of cwd
+├── off()                           # method of off
+├── runCmd()                        # method of runCmd
+└─── Class:CHILDPROCESS             # class of CHILDPROCESS
+    ├── close()                     # method of close
+    ├── kill()                      # method of kill
+    ├── getOutput()                 # method of getOutput
+    ├── getErrorOutput()            # method of getErrorOutput
+    ├── wait()                      # method of wait
+    ├── killed                      # attribute of killed
+    ├── pid                         # attribute of pid
+    ├── ppid                        # attribute of ppid
+    └── exitCode                    # attribute of exitCode
+```
 
-3.getEUid() :number;
+## Description
 
-该process.geteuid()方法返回进程的数字有效用户身份。
+### Interface description
+| Interface name | description |
+| -------- | -------- |
+| getUid() :number | returns the digital user ID of the process. |
+| getGid() :number | returns the numeric group ID of the process. |
+| getEUid() :number | returns the numeric valid user identity of the process. |
+| getEGid() :number | returns the numeric valid group ID of the node.js process. |
+| getGroups() :number[] |  returns an array with supplementary group ID. |
+| getPid() :number | returns the PID of the process. |
+| getPpid() :number |  returns the PID of the parent process of the current process. |
+| chdir(dir:string) :void | change the current working directory of the node.js process. |
+| uptime() :number |  returns the number of seconds the current system has been running. |
+| Kill(pid:number, signal:number) :boolean | send the signal to the identified process PID, and true means the sending is successful. |
+| abort() :void | cause the node.js process to exit immediately and generate a core file. |
+| on(type:string ,listener:EventListener) :void | used to store events triggered by users. |
+| exit(code:number):void | cause the node.js process to exit immediately. |
+| cwd():string |  returns the current working directory of the node.js process. |
+| off(type: string): boolean | clear the events stored by the user. True means the clearing is successful. |
+| runCmd(command : string, options?: RunOptions): ChildProcess |through runcmd, you can fork a new process to run a shell and return the childprocess object. The first parameter command refers to the shell to be run, and the second parameter options refers to some running parameters of the child process. These parameters mainly refer to timeout, killsignal and maxbuffer. If timeout is set, the child process will send a signal killsignal after timeout is exceeded. Maxbuffer is used to limit the maximum stdout and stderr sizes that can be received. |
+| wait()： Promise | is used to wait for the child process to run and return the promise object, whose value is the exit code of the child process. |
+| getOutput(): Promise |  used to get the standard output of the child process. |
+| getErrorOutput(): Promise | used to get the standard error output of the child process. |
+| close(): void | used to close the running child process. |
+| kill(signo: number): void |  used to send signals to child processes. |
+| readonly killed: boolean | indicates whether the signal is sent successfully, and true indicates that the signal is sent successfully. |
+| readonly exitCode: number | indicates the exit code of the child process. |
+| pid | represents the child process ID. |
+| ppid | represents the main process ID. |
 
-4.getEGid() :number;
+### Interface instructions
 
-该process.getegid()方法返回 Node.js 进程的数字有效组标识。
-
-5.getGroups() :number[];
-
-该process.getgroups()方法返回一个带有补充组 ID 的数组。
-
-6.getPid() :number;
-
-该process.pid属性返回进程的 PID。
-
-7.getPpid() :number;
-
-该process.ppid属性返回当前进程的父进程的 PID。
-
-8.chdir(dir:string) :void;
-
-该process.chdir()方法更改 Node.js 进程的当前工作目录。
-
-9.uptime() :number;
-
-该process.uptime()方法返回当前系统已运行的秒数。
-
-10.Kill(pid:number, signal:number) :boolean;
-
-该process.kill()方法将 发送signal到由 标识的进程 pid。
-
-11.abort() :void;
-
-该process.abort()方法会导致 Node.js 进程立即退出并生成一个核心文件。
-
-12.on(type:string ,listener:EventListener) :void;
-
-该process.on()方法是用来存储用户所触发的事件。
-
-13.exit(code:number):void;
-
-该process.Exit()方法会导致 Node.js 进程立即退出。
-
-14.cwd():string;
-
-该process.cwd()方法返回 Node.js 进程的当前工作目录。
-
-15.off(type: string): boolean;
-
-该process.off()方法会清除用户存储的事件。
-
-process 使用方法
-import { Process } from '@ohos.process' export default { data: { title: "" },
-
-getGid() {
-    var proc = new Process();
-    var result = proc.getGid;
-    console.log("-------"+result);
-},
-
-getUid() {
-    var proc = new Process();
-    var res =  proc.getUid;
+Example of using interface：
+1.getUid() 
+```
+getUid(){
+    var res =  Process.getUid;
     console.log("-------"+res);
-},
-
-getEgid() {
-    var proc = new Process();
-    var resb = proc.getEgid;
-    console.log("-------"+resb);
-},
-
-getEuid() {
-    var proc = new Process();
-    var ans = proc.getEuid;
+}
+```
+2.getGid()
+```
+getGid(){
+    var result = Process.getGid;
+    console.log("-------"+result);
+}
+```
+3.getEuid()
+```
+getEuid(){
+    var ans = Process.getEuid;
     console.log("-------"+ans);
-},
-
-getGroups() {
-    var proc = new Process();
-    var answer = proc.getGroups;
+}
+```
+4.getEgid()
+```
+getEgid(){
+    var resb = Process.getEgid;
+    console.log("-------"+resb);
+}
+```
+5.getGroups()
+```
+getGroups(){
+    var answer = Process.getGroups;
     console.log("-------"+answer);
-},
-
-uptime() {
-    var proc = new Process();
-    var num = proc.uptime();
-    console.log("---------"+num);
-},
-
-kill() {
-    var proc = new Process();
-    var ansu = proc.kill(5,10);
-    console.log("------"+ansu);
-},
-
-chdir() {
-    var proc = new Process();
-    proc.chdir("123456");
-},
-
- getPid() {
-    var pro = new Process();
-    var result = pro.getPid;
+}
+```
+6.getPid() 
+```
+getPid(){
+    var result = Process.getPid;
     console.log("-----"+result);
-},
-
+}
+```
+7.getPpid()
+```
 getPpid(){
-    var pro = new Process();
-    var result = pro.getPpid;
+    var result = Process.getPpid;
     console.log("---------"+result);
-},
-
+}
+```
+8.chdir()
+```
+chdir(){
+    Process.chdir("123456");
+}
+```
+9.uptime()
+```
+uptime(){
+    var num = Process.uptime();
+    console.log("---------"+num);
+}
+```
+10.kill()
+```
+kill(){
+    var ansu = Process.kill(5,23);
+    console.log("------"+ansu);
+}
+```
+11.abort()
+```
+abort(){
+    Process.abort();
+}
+```
+12.on()
+```
 on(){
     function add(num){
         var value = num + 5;
         return value;
     }
-    var proc = new Process();
-    proc.on("add",add);
-},
-
-off(){
-    var pro = new Process();
-    var result = pro.off("add");
-    console.log("--------"+result);
-},
-
-Cwd(){
-    var pro = new Process();
-    var result = pro.cwd();
-    console.log("----"+result);
-},
-
+    Process.on("add",add);
+}
+```
+13.exit()
+```
 exit(){
-    var pro = new Process();
-    pro.exit(15);
-},
-
-abort(){
-    var pro = new Process();
-    pro.abort();
-},
-
-onInit() {
-    this.title = "strings.world";
+    Process.exit(15);
 }
+```
+14.Cwd()
+```
+Cwd(){
+    var result = Process.cwd();
+    console.log("----"+result);
 }
+```
+15.off()
 
-#### 二、childprocess简介
+```
+off(){
+    var result =  Process.off("add");
+    console.log("---------"+result);
+}
+```
+16.runCmd()
+```
+runCmd(){
+    var child = process.runCmd('echo abc')
+    // killSignal can be a number or a string
+    var child = process.runCmd('echo abc;', {killSignal : 'SIGKILL'});
+    var child = process.runCmd('sleep 5; echo abc;', {timeout : 1, killSignal : 9, maxBuffer : 2})
+}
+```
+17.wait()
+```
+wait()
+{
+    var child = process.runCmd('ls')
+    var status = child.wait();
+    status.then(val => {
+        console.log(val);
+    })
+}
+```
+18.getOutput()
+```
+getOutput(){
+    var child = process.runCmd('echo bcd;');
+    var res = child.getOutput();
+    child.wait();
+    res.then(val => {
+        console.log(val);
+    })
+}
+```
+19.getErrorOutput()
+```
+getErrorOutput(){
+    var child = process.runCmd('makdir 1.txt'); // execute an error command
+    var res = child.getErrorOutput();
+    child.wait();
+    res.then(val => {
+        console.log(val);
+    })
+}
+```
+20.close()
+```
+close(){
+    var child =  process.runCmd('ls; sleep 5s;')
+    var result = child.close()
+    console.log(child.exitCode);
+}
+```
+21.kill()
+```
+kill(){
+    var child =  process.runCmd('ls; sleep 5s;')
+    var result = child.kill('SIGHUP');
+    child.wait();
+    var temp = child.killed;
+    console.log(temp);
+}
+```
+22.killed
+```
+{
+    var child = process.runCmd('ls; sleep 5;')
+    child.kill(3);
+    var killed_ = child.killed;
+    console.log(killed_);
+    child.wait();
+}
+```
+23.exitCode
+```
+{
+    var child = process.runCmd('ls; sleep 5;')
+    child.kill(9);
+    child.wait();
+    var exitCode_ = child.exitCode;
+    console.log(exitCode_);
+}
+```
+24.pid
+```
+pid
+{
+    var child = process.runCmd('ls; sleep 5;')
+    var pid_ = child.pid;
+    console.log(pid_);
+    child.wait();
+}
+```
+25.ppid
+```
+ppid
+{
+    var child = process.runCmd('ls; sleep 5;')
+    var ppid_ = child.ppid;
+    console.log(ppid_);
+    child.wait();
+}
+```
 
-通过childprocess对象可以用来创建一个新的进程，主进程可以获取子进程的标准输入输出，以及发送信号和关闭子进程。
 
-接口介绍
+## Related warehouse
 
-1.runCmd(command : string, options?: RunOptions): ChildProcess
+[js_sys_module subsystem](https://gitee.com/OHOS_STD/js_sys_module)
 
-通过runcmd可以fork一个新的进程来运行一段shell，并返回ChildProcess对象。
-
-第一个参数command指需要运行的shell，第二个参数options指子进程的一些运行参数。
-
-这些参数主要指timeout、killSignal、maxBuffer 。
-
-如果设置了timeout则子进程会在超出timeout后发送信号killSignal，maxBuffer用来限制可接收的最大stdout和stderr大小。
-
-2.wait()： Promise
-
-wait函数用来等待子进程运行结束，返回promise对象，其值为子进程的退出码。
-
-3.getOutput(): Promise
-
-getOutput函数用来获取子进程的标准输出。
-
-4.getErrorOutput(): Promise
-
-getErrorOutput函数用来获取子进程的标准错误输出。
-
-5.close(): void
-
-close函数用来关闭正在运行的子进程。
-
-6.kill(signo: number): void
-
-kill函数用来发送信号给子进程。
-
-7.readonly killed: boolean
-
-killed表示信号是否发送成功。
-
-8.readonly exitCode: number
-
-exitCode表示子进程的退出吗
-
-9.pid和ppid
-
-分别代表子进程id和主进程id
-
-使用方法
-以ls命令为例
-
-        var child = childprocess.runCmd("ls", {maxBuffer:9999,killSignal:15} );
-        var stdoutRes = child.getOutput();
-        var stderrRes = child.getErrorOutput();
-        var status = child.wait();
-        stdoutRes.then(val=>{
-            console.log("stdout = :" + val);
-        });
-        stderrRes.then(val=>{
-            console.log("stderr = :" + val);
-        });
-        status.then(val=>{
-            console.log("status = :" + val);
-        });
+[base/compileruntime/js_sys_module/](base/compileruntime/js_sys_module-readme.md)
