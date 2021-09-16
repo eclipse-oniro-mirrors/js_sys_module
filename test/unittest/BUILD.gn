@@ -11,55 +11,40 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
+import("//build/ohos.gni")
 
-if (is_standard_system) {
-  module_output_path = "ace_engine_standard/napi"
-}
-
-ohos_unittest("test_process_unittest") {
-  module_out_path = module_output_path
-
+ohos_shared_library("process") {
   include_dirs = [
-    "//base/compileruntime/js_util_module/util",
-    "//base/compileruntime/js_sys_module/process",
-    "//foundation/ace/napi",
-    "//foundation/ace/napi/interfaces/kits",
-    "//foundation/ace/napi/native_engine",
-    "//foundation/ace/napi/native_engine/impl/quickjs",
     "//third_party/icu/icu4c/source/common",
-    "//third_party/googletest/include",
     "//third_party/node/src",
-    "//utils/native/base/include",
+    "//foundation/ace/napi/interfaces/kits",
+    "//base/compileruntime/js_sys_module/process",
   ]
 
-  cflags = [ "-g3" ]
-
   sources = [
-    "test_process.cpp",
-    "test_quickjs.cpp",
+    "js_childprocess.cpp",
+    "js_process.cpp",
+    "native_module_process.cpp",
   ]
 
   deps = [
-    "//base/compileruntime/js_sys_module/process:process_packages",
-    "//base/compileruntime/js_util_module/util:util_packages",
     "//foundation/ace/napi/:ace_napi",
     "//foundation/ace/napi/:ace_napi_quickjs",
-    "//third_party/googletest:gtest",
-    "//third_party/googletest:gtest_main",
     "//third_party/icu/icu4c:static_icuuc",
-    "//third_party/libuv:uv_static",
-    "//third_party/quickjs:qjs",
     "//utils/native/base:utils",
-    "//utils/native/base:utilsecurec",
   ]
 
   if (is_standard_system) {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  } else {
+    external_deps = [ "hilog:libhilog" ]
   }
+  subsystem_name = "ccruntime"
+  part_name = "jsapi_sys"
+
+  relative_install_dir = "module"
 }
 
-group("unittest") {
-  testonly = true
-  deps = [ ":test_process_unittest" ]
+group("process_packages") {
+  deps = [ ":process" ]
 }
