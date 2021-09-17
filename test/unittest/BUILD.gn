@@ -14,7 +14,7 @@
 import("//build/test.gni")
 
 if (is_standard_system) {
-  module_output_path = "ace_engine_standard/napi"
+  module_output_path = "jsapi_sys/process"
 }
 
 ohos_unittest("test_process_unittest") {
