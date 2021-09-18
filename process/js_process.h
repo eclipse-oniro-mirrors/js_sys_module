@@ -52,6 +52,7 @@ namespace OHOS::Js_sys_module::Process {
         napi_value GetPastCputime() const;
         napi_value GetSystemConfig(napi_value name);
         napi_value GetAvailableCores() const;
+        napi_value GetEnvironmentVar(napi_value name) const;
     private:
         double ConvertTime(time_t tvsec, long tvnsec) const;
     private:

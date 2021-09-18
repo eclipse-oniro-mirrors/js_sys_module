@@ -39,8 +39,7 @@ namespace OHOS::Js_sys_module::Process {
         if (args[1] == nullptr) {
             return nullptr;
         }
-        size_t size = keyStr.size();
-        for (size_t i = 0; i < size; i++) {
+        for (size_t i = 0; i < argsSize; i++) {
             napi_valuetype propertyType = napi_undefined;
             napi_value property = nullptr;
             NAPI_CALL(env, napi_get_named_property(env, args[1], keyStr[i].c_str(), &property));
@@ -57,13 +56,13 @@ namespace OHOS::Js_sys_module::Process {
                         }
                         break;
                     }
-                case 1:
+                case 1: // 1:KillSignal
                     NAPI_CALL(env, napi_typeof(env, property, &propertyType));
                     NAPI_ASSERT(env, propertyType == napi_string || propertyType == napi_number
                                 || propertyType == napi_undefined,
                                 "Wrong KillSignal argument typr. String or number expected");
                     break;
-                case 2:
+                case 2: // 2:maxBuffer
                     NAPI_CALL(env, napi_typeof(env, property, &propertyType));
                     NAPI_ASSERT(env, propertyType == napi_number || propertyType == napi_undefined,
                                 "Wrong maxBuffer argument typr. Number expected");
@@ -78,7 +77,7 @@ namespace OHOS::Js_sys_module::Process {
     static napi_value ChildProcessConstructor(napi_env env, napi_callback_info info)
     {
         napi_value thisVar = nullptr;
-        void* data = nullptr;
+        void *data = nullptr;
         size_t argc = 2;
         napi_value args[2] = { nullptr };
         NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, &thisVar, &data));
@@ -88,10 +87,10 @@ namespace OHOS::Js_sys_module::Process {
         objectInfo->Spawn(args[0]);
         NAPI_CALL(env, napi_wrap(
             env, thisVar, objectInfo,
-            [](napi_env env, void* data, void* hint) {
-                auto objectInfo = (ChildProcess*)data;
-                if (objectInfo != nullptr) {
-                    delete objectInfo;
+            [](napi_env env, void *data, void *hint) {
+                auto obj = (ChildProcess*)data;
+                if (obj != nullptr) {
+                    delete obj;
                 }
             },
             nullptr, nullptr));
@@ -102,7 +101,7 @@ namespace OHOS::Js_sys_module::Process {
     {
         napi_value thisVar = nullptr;
         NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
-        ChildProcess* object = nullptr;
+        ChildProcess *object = nullptr;
         NAPI_CALL(env, napi_unwrap(env, thisVar, reinterpret_cast<void**>(&object)));
         napi_value result = object->Wait();
         return result;
@@ -112,7 +111,7 @@ namespace OHOS::Js_sys_module::Process {
     {
         napi_value thisVar = nullptr;
         NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
-        ChildProcess* object = nullptr;
+        ChildProcess *object = nullptr;
         NAPI_CALL(env, napi_unwrap(env, thisVar, reinterpret_cast<void**>(&object)));
         napi_value result = object->GetOutput();
         return result;
@@ -122,7 +121,7 @@ namespace OHOS::Js_sys_module::Process {
     {
         napi_value thisVar = nullptr;
         NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
-        ChildProcess* object = nullptr;
+        ChildProcess *object = nullptr;
         NAPI_CALL(env, napi_unwrap(env, thisVar, reinterpret_cast<void**>(&object)));
         object->Close();
         napi_value result = nullptr;
@@ -134,7 +133,7 @@ namespace OHOS::Js_sys_module::Process {
     {
         napi_value thisVar = nullptr;
         NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
-        ChildProcess* object = nullptr;
+        ChildProcess *object = nullptr;
         NAPI_CALL(env, napi_unwrap(env, thisVar, reinterpret_cast<void**>(&object)));
         napi_value result = object->GetErrorOutput();
         return result;
@@ -153,7 +152,7 @@ namespace OHOS::Js_sys_module::Process {
         if ((valuetype != napi_valuetype::napi_number) && (valuetype != napi_valuetype::napi_string)) {
             napi_throw_error(env, nullptr, "The parameter type is incorrect");
         }
-        ChildProcess* object = nullptr;
+        ChildProcess *object = nullptr;
         NAPI_CALL(env, napi_unwrap(env, thisVar, reinterpret_cast<void**>(&object)));
         object->Kill(args);
         napi_value result = nullptr;
@@ -165,7 +164,7 @@ namespace OHOS::Js_sys_module::Process {
     {
         napi_value thisVar = nullptr;
         NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
-        ChildProcess* object = nullptr;
+        ChildProcess *object = nullptr;
         NAPI_CALL(env, napi_unwrap(env, thisVar, reinterpret_cast<void**>(&object)));
         napi_value result = object->GetKilled();
         return result;
@@ -175,7 +174,7 @@ namespace OHOS::Js_sys_module::Process {
     {
         napi_value thisVar = nullptr;
         NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
-        ChildProcess* object = nullptr;
+        ChildProcess *object = nullptr;
         NAPI_CALL(env, napi_unwrap(env, thisVar, reinterpret_cast<void**>(&object)));
         napi_value result = object->Getpid();
         return result;
@@ -185,7 +184,7 @@ namespace OHOS::Js_sys_module::Process {
     {
         napi_value thisVar = nullptr;
         NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
-        ChildProcess* object = nullptr;
+        ChildProcess *object = nullptr;
         NAPI_CALL(env, napi_unwrap(env, thisVar, reinterpret_cast<void**>(&object)));
         napi_value result = object->Getppid();
         return result;
@@ -195,7 +194,7 @@ namespace OHOS::Js_sys_module::Process {
     {
         napi_value thisVar = nullptr;
         NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, nullptr));
-        ChildProcess* object = nullptr;
+        ChildProcess *object = nullptr;
         NAPI_CALL(env, napi_unwrap(env, thisVar, reinterpret_cast<void**>(&object)));
         napi_value result = object->GetExitCode();
         return result;
@@ -207,7 +206,7 @@ namespace OHOS::Js_sys_module::Process {
         size_t argc = 2;
         napi_value args[2] = { nullptr };
         NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, &thisVar, nullptr));
-        const char* childProcessClassName = "ChildProcess";
+        const char *childProcessClassName = "ChildProcess";
         napi_value childProcessClass = nullptr;
         static napi_property_descriptor childProcessDesc[] = {
             DECLARE_NAPI_FUNCTION("close", Close),
@@ -366,7 +365,7 @@ namespace OHOS::Js_sys_module::Process {
         size_t argc = 2;
         napi_value argv[2] = {0};
         napi_value thisVar = nullptr;
-        void* data = nullptr;
+        void *data = nullptr;
         napi_get_cb_info(env, info, &argc, argv, &thisVar, &data);
         Process object(env);
         napi_value result = nullptr;
@@ -455,6 +454,19 @@ namespace OHOS::Js_sys_module::Process {
         return object.GetSystemConfig(args);
     }
 
+    static napi_value GetEnvironmentVar(napi_env env, napi_callback_info info)
+    {
+      	napi_value thisVar = nullptr;
+      	size_t argc = 1;
+      	napi_value args = nullptr;
+      	napi_get_cb_info(env, info, &argc, &args, &thisVar, nullptr);
+      	napi_valuetype valuetype;
+      	NAPI_CALL(env, napi_typeof(env, args, &valuetype));
+      	NAPI_ASSERT(env, valuetype == napi_string, "Wrong argument type.String error");
+      	Process object(env);
+      	return object.GetEnvironmentVar(args);
+    }
+
     static napi_value GetAvailableCores(napi_env env, napi_callback_info info)
     {
         Process object(env);
@@ -490,6 +502,7 @@ namespace OHOS::Js_sys_module::Process {
             DECLARE_NAPI_FUNCTION("getUidForName", GetUidForName),
             DECLARE_NAPI_FUNCTION("getThreadPriority", GetThreadPriority),
             DECLARE_NAPI_FUNCTION("getSystemConfig", GetSystemConfig),
+            DECLARE_NAPI_FUNCTION("getEnvironmentVar", GetEnvironmentVar),
         };
         NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
         return exports;

@@ -124,7 +124,7 @@ namespace OHOS::Js_sys_module::Process {
     {
         size_t prolen = 0;
         napi_get_value_string_utf8(env, args, nullptr, 0, &prolen);
-        char* path = nullptr;
+        char *path = nullptr;
         if (prolen > 0) {
             path = new char[prolen + 1];
             if (memset_s(path, prolen + 1, '\0', prolen + 1) != 0) {
@@ -314,6 +314,32 @@ namespace OHOS::Js_sys_module::Process {
             NAPI_CALL(env, napi_get_boolean(env, flag, &result));
             return result;
         }
+    }
+
+    napi_value Process::GetEnvironmentVar(napi_value name) const
+    {
+        char *buffer = nullptr;
+        char *env_var = nullptr;
+        napi_value result = nullptr;
+        size_t bufferSize = 0;
+        napi_get_value_string_utf8(env, name, buffer, 0, &bufferSize);
+        if (bufferSize > 0) {
+        	  buffer = new char[bufferSize + 1];
+        }
+        napi_get_value_string_utf8(env, name, buffer, bufferSize + 1, &bufferSize);
+        std::string temp = "";
+        if (buffer != nullptr) {
+          	temp = buffer;
+          	delete []buffer;
+          	buffer = nullptr;
+        }
+        env_var = getenv(temp.c_str());
+        if (env_var == nullptr) {
+            NAPI_CALL(env, napi_get_undefined(env, &result));
+            return result;
+        }
+        napi_create_string_utf8(env, env_var, strlen(env_var), &result);
+        return result;
     }
 
     napi_value Process::GetUidForName(napi_value name) const
