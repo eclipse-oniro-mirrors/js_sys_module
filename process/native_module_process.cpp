@@ -456,15 +456,15 @@ namespace OHOS::Js_sys_module::Process {
 
     static napi_value GetEnvironmentVar(napi_env env, napi_callback_info info)
     {
-      	napi_value thisVar = nullptr;
-      	size_t argc = 1;
-      	napi_value args = nullptr;
-      	napi_get_cb_info(env, info, &argc, &args, &thisVar, nullptr);
-      	napi_valuetype valuetype;
-      	NAPI_CALL(env, napi_typeof(env, args, &valuetype));
-      	NAPI_ASSERT(env, valuetype == napi_string, "Wrong argument type.String error");
-      	Process object(env);
-      	return object.GetEnvironmentVar(args);
+        napi_value thisVar = nullptr;
+        size_t argc = 1;
+        napi_value args = nullptr;
+        napi_get_cb_info(env, info, &argc, &args, &thisVar, nullptr);
+        napi_valuetype valuetype;
+        NAPI_CALL(env, napi_typeof(env, args, &valuetype));
+        NAPI_ASSERT(env, valuetype == napi_string, "Wrong argument type.String error");
+        Process object(env);
+        return object.GetEnvironmentVar(args);
     }
 
     static napi_value GetAvailableCores(napi_env env, napi_callback_info info)

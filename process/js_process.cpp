@@ -324,14 +324,14 @@ namespace OHOS::Js_sys_module::Process {
         size_t bufferSize = 0;
         napi_get_value_string_utf8(env, name, buffer, 0, &bufferSize);
         if (bufferSize > 0) {
-        	  buffer = new char[bufferSize + 1];
+            buffer = new char[bufferSize + 1];
         }
         napi_get_value_string_utf8(env, name, buffer, bufferSize + 1, &bufferSize);
         std::string temp = "";
         if (buffer != nullptr) {
-          	temp = buffer;
-          	delete []buffer;
-          	buffer = nullptr;
+            temp = buffer;
+            delete []buffer;
+            buffer = nullptr;
         }
         env_var = getenv(temp.c_str());
         if (env_var == nullptr) {
