@@ -22,7 +22,6 @@
 #include "napi/native_node_api.h"
 namespace OHOS::Js_sys_module::Process {
     constexpr int MAXSIZE = 1024;
-    constexpr int TIME_EXCHANGE = 1000;
     struct WaitInfo {
         napi_async_work worker = nullptr;
         napi_deferred deferred = nullptr;
