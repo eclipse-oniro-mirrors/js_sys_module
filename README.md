@@ -27,6 +27,17 @@ base/compileruntime/js_sys_module/
 ├── kill()                          # method of kill
 ├── abort()                         # method of abort
 ├── on()                            # method of on
+├── getTid()                        # method of getTid方法
+├── getStartRealtime()              # method of getStartRealtime
+├── getAvailableCores()             # method of getAvailableCores
+├── getPastCputime()                # method of getPastCputime
+├── isIsolatedProcess()             # method of isIsolatedProcess
+├── is64Bit()                       # method of is64Bit
+├── isAppUid()                      # method of isAppUid
+├── getUidForName()                 # method of getUidForName
+├── getThreadPriority()             # method of getThreadPriority
+├── getSystemConfig()               # method of getSystemConfig
+├── getEnvironmentVar()             # method of getEnvironmentVar
 ├── exit()                          # method of exit
 ├── cwd()                           # method of cwd
 ├── off()                           # method of off
@@ -67,6 +78,17 @@ base/compileruntime/js_sys_module/
 | wait()： Promise | is used to wait for the child process to run and return the promise object, whose value is the exit code of the child process. |
 | getOutput(): Promise |  used to get the standard output of the child process. |
 | getErrorOutput(): Promise | used to get the standard error output of the child process. |
+| getTid() :number | Returns the TID of the process. |
+| getStartRealtime() :number | Gets the real time elapsed (in milliseconds) from system startup to process startup. |
+| getAvailableCores() :number[] | Gets the CPU kernel available to the current process on the multi-core device. |
+| getPastCputime() :number | Gets the CPU time (in milliseconds) from the start of the process to the current time. |
+| isIsolatedProcess(): boolean | Check if the process is quarantined. |
+| is64Bit(): boolean | Check whether the process is running in a 64 bit environment. |
+| isAppUid(v:number): boolean | Checks whether the specified uid belongs to a specific application. |
+| getUidForName(v:string): number | Obtain the user group ID to which the user belongs according to the user name |
+| getThreadPriority(v:number): number | Gets the thread priority based on the specified TID. |
+| getSystemConfig(name:number): number | Gets the configuration of the system according to the specified system configuration name. |
+| getEnvironmentVar(name:string): string | Obtain the corresponding value according to the name of the environment variable. |
 | close(): void | used to close the running child process. |
 | kill(signo: number): void |  used to send signals to child processes. |
 | readonly killed: boolean | indicates whether the signal is sent successfully, and true indicates that the signal is sent successfully. |
@@ -281,6 +303,86 @@ ppid
     var ppid_ = child.ppid;
     console.log(ppid_);
     child.wait();
+}
+```
+26.getTid()
+```
+getTid(){
+    var ansu = Process.getTid();
+    console.log("------"+ansu);
+}
+```
+27.isIsolatedProcess()
+```
+isIsolatedProcess(){
+    var ansu = Process.isIsolatedProcess()();
+    console.log("------"+ansu);
+}
+```
+28.isAppUid()
+```
+isAppUid(){
+    var ansu = Process.isAppUid(10000);
+    console.log("------"+ansu);
+}
+```
+29.is64Bit()
+```
+is64Bit(){
+    var ansu = Process.is64Bit();
+    console.log("------"+ansu);
+}
+```
+30.getUidForName()
+```
+getUidForName(){
+	var buf = "root";
+    var ansu = Process.getUidForName(buf);
+    console.log("------"+ansu);
+}
+```
+31.getEnvironmentVar()
+```
+getEnvironmentVar(){
+    var ansu = Process.getEnvironmentVar('USER');
+    console.log("------"+ansu);
+}
+```
+32.getAvailableCores()
+```
+getAvailableCores(){
+    var ansu = Process.getAvailableCores();
+    console.log("------"+ansu);
+}
+```
+33.getThreadPriority()
+```
+getThreadPriority(){
+	var result = Process.getTid();
+    var ansu = getThreadPriority(result);
+    console.log("------"+ansu);
+}
+```
+34.getStartRealtime()
+```
+getStartRealtime(){
+    var ansu = Process.getStartRealtime();
+    console.log("------"+ansu);
+}
+```
+35.getPastCputime()
+```
+getPastCputime(){
+    var ansu = Process.getPastCputime();
+    console.log("------"+ansu);
+}
+```
+36.getSystemConfig()
+```
+getSystemConfig(){
+    var _SC_ARG_MAX = 0;
+    var ansu = Process.getSystemConfig(_SC_ARG_MAX)
+    console.log("------"+ansu);
 }
 ```
 

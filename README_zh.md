@@ -30,6 +30,17 @@ base/compileruntime/js_sys_module/
 ├── exit()                          # exit方法
 ├── cwd()                           # cwd方法
 ├── off()                           # off方法
+├── getTid()                        # getTid方法
+├── getStartRealtime()              # getStartRealtime方法
+├── getAvailableCores()             # getAvailableCores方法
+├── getPastCputime()                # getPastCputime方法
+├── isIsolatedProcess()             # isIsolatedProcess方法
+├── is64Bit()                       # is64Bit方法
+├── isAppUid()                      # isAppUid方法
+├── getUidForName()                 # getUidForName方法
+├── getThreadPriority()             # getThreadPriority方法
+├── getSystemConfig()               # getSystemConfig方法
+├── getEnvironmentVar()             # getEnvironmentVar方法
 ├── runCmd()                        # runCmd方法
 └─── Class:CHILDPROCESS             # CHILDPROCESS类
     ├── close()                     # close方法
@@ -62,7 +73,17 @@ base/compileruntime/js_sys_module/
 | on(type:string ,listener:EventListener) :void | 用来存储用户所触发的事件。 |
 | exit(code:number):void | 会导致 Node.js 进程立即退出。 |
 | cwd():string | 返回 Node.js 进程的当前工作目录。 |
-| off(type: string): boolean | 会清除用户存储的事件，true代表清除成功。 |
+| getTid() :number | 返回进程的TID。 |
+| getStartRealtime() :number | 获取从系统启动到进程启动所经过的实时时间（以毫秒为单位）。 |
+| getAvailableCores() :number[] | 获取多核设备上当前进程可用的 CPU 内核。 |
+| getPastCputime() :number | 获取进程启动到当前时间的CPU时间（以毫秒为单位）。 |
+| isIsolatedProcess(): boolean | 检查进程是否被隔离。 |
+| is64Bit(): boolean | 检查进程是否在 64 位环境中运行。 |
+| isAppUid(v:number): boolean | 检查指定的 UID 是否属于特定应用程序。 |
+| getUidForName(v:string): number | 根据用户名获取用户所属的用户组ID。 |
+| getThreadPriority(v:number): number | 根据指定的 TID 获取线程优先级。 |
+| getSystemConfig(name:number): number | 根据指定的系统配置名称获取系统的配置。 |
+| getEnvironmentVar(name:string): string | 根据环境变量的名称获取对应的值。 |
 | runCmd(command : string, options?: RunOptions): ChildProcess | 通过runcmd可以fork一个新的进程来运行一段shell，并返回ChildProcess对象。第一个参数command指需要运行的shell，第二个参数options指子进程的一些运行参数。这些参数主要指timeout、killSignal、maxBuffer 。如果设置了timeout则子进程会在超出timeout后发送信号killSignal，maxBuffer用来限制可接收的最大stdout和stderr大小。 |
 | wait()： Promise | 用来等待子进程运行结束，返回promise对象，其值为子进程的退出码。 |
 | getOutput(): Promise | 用来获取子进程的标准输出。 |
@@ -283,7 +304,86 @@ ppid
     child.wait();
 }
 ```
-
+26.getTid()
+```
+getTid(){
+    var ansu = Process.getTid();
+    console.log("------"+ansu);
+}
+```
+27.isIsolatedProcess()
+```
+isIsolatedProcess(){
+    var ansu = Process.isIsolatedProcess()();
+    console.log("------"+ansu);
+}
+```
+28.isAppUid()
+```
+isAppUid(){
+    var ansu = Process.isAppUid(10000);
+    console.log("------"+ansu);
+}
+```
+29.is64Bit()
+```
+is64Bit(){
+    var ansu = Process.is64Bit();
+    console.log("------"+ansu);
+}
+```
+30.getUidForName()
+```
+getUidForName(){
+	var buf = "root";
+    var ansu = Process.getUidForName(buf);
+    console.log("------"+ansu);
+}
+```
+31.getEnvironmentVar()
+```
+getEnvironmentVar(){
+    var ansu = Process.getEnvironmentVar('USER');
+    console.log("------"+ansu);
+}
+```
+32.getAvailableCores()
+```
+getAvailableCores(){
+    var ansu = Process.getAvailableCores();
+    console.log("------"+ansu);
+}
+```
+33.getThreadPriority()
+```
+getThreadPriority(){
+	var result = Process.getTid();
+    var ansu = getThreadPriority(result);
+    console.log("------"+ansu);
+}
+```
+34.getStartRealtime()
+```
+getStartRealtime(){
+    var ansu = Process.getStartRealtime();
+    console.log("------"+ansu);
+}
+```
+35.getPastCputime()
+```
+getPastCputime(){
+    var ansu = Process.getPastCputime();
+    console.log("------"+ansu);
+}
+```
+36.getSystemConfig()
+```
+getSystemConfig(){
+    var _SC_ARG_MAX = 0;
+    var ansu = Process.getSystemConfig(_SC_ARG_MAX)
+    console.log("------"+ansu);
+}
+```
 
 ## 相关仓
 

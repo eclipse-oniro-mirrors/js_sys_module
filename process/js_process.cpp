@@ -344,7 +344,7 @@ namespace OHOS::Js_sys_module::Process {
 
     napi_value Process::GetUidForName(napi_value name) const
     {
-        struct passwd *user;
+        struct passwd *user = nullptr;
         int32_t uid = 0;
         napi_value result = nullptr;
         char *buffer = nullptr;

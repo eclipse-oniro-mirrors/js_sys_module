@@ -205,6 +205,9 @@ namespace OHOS::Js_sys_module::Process {
     {
         auto stdOutInfo = (StdInfo*)data;
         char childStdout[MAXSIZE] = {0};
+        if (stdOutInfo->isNeedRun == nullptr) {
+            return;
+        }
         while (*(stdOutInfo->isNeedRun)) {
             read(stdOutInfo->fd, childStdout, sizeof(childStdout) - 1);
             if (strlen(childStdout) > 0) {
@@ -218,7 +221,7 @@ namespace OHOS::Js_sys_module::Process {
                     HILOG_ERROR("stdOut maxBuff kill signal failed");
                 }
             }
-            if (memset_s(childStdout, MAXSIZE, '\0', MAXSIZE - 1) != 0) {
+            if (memset_s(childStdout, sizeof(childStdout), '\0', MAXSIZE) != 0) {
                 HILOG_ERROR("getOutput memset_s failed");
                 return;
             }
@@ -250,6 +253,9 @@ namespace OHOS::Js_sys_module::Process {
     {
         auto stdErrInfo = (StdInfo*)data;
         char childStderr[MAXSIZE] = {0};
+        if (stdErrInfo->isNeedRun == nullptr) {
+            return;
+        }
         while (*(stdErrInfo->isNeedRun)) {
             read(stdErrInfo->fd, childStderr, sizeof(childStderr) - 1);
             if (strlen(childStderr) > 0) {
@@ -263,7 +269,7 @@ namespace OHOS::Js_sys_module::Process {
                     HILOG_ERROR("stdErr maxBuff kill signal failed");
                 }
             }
-            if (memset_s(childStderr, MAXSIZE, '\0', MAXSIZE - 1) != 0) {
+            if (memset_s(childStderr, sizeof(childStderr), '\0', MAXSIZE) != 0) {
                 HILOG_ERROR("getOutput memset_s failed");
                 return;
             }
@@ -345,7 +351,7 @@ namespace OHOS::Js_sys_module::Process {
     {
         std::vector<int32_t> signalType = {SIGINT, SIGQUIT, SIGKILL, SIGTERM};
         auto temp = (OptionsInfo*)data;
-        int32_t timeout = temp->timeout * TIME_EXCHANGE;
+        int32_t timeout = temp->timeout * 1000; // 1000:TIME_EXCHANGE
         if (timeout > 0) {
             usleep(timeout);
             if (*(temp->isNeedRun)) {

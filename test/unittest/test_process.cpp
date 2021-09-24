@@ -158,30 +158,3 @@ HWTEST_F(NativeEngineTest, ProcessRunCmdTest002, testing::ext::TestSize.Level0)
     napi_is_promise(env, errorOutput, &res);
     ASSERT_TRUE(res);
 }
-
-/**
- * @tc.name: ChildProcessKillTest001
- * @tc.desc: Test childProces kill signal.
- * @tc.type: FUNC
- */
-HWTEST_F(NativeEngineTest, ChildProcessKillTest001, testing::ext::TestSize.Level0)
-{
-    napi_env env = (napi_env)engine_;
-    OHOS::Js_sys_module::Process::Process process(env);
-
-    std::string command("sleep 1; ls;");
-    napi_value temp = nullptr;
-    napi_create_string_utf8(env, command.c_str(), command.length(), &temp);
-
-    OHOS::Js_sys_module::Process::ChildProcess childprocess = RunCommand(env, temp, nullptr);
-
-    napi_value signal = nullptr;
-    napi_create_int32(env, 9, &signal);
-    childprocess.Kill(signal);
-    childprocess.Wait();
-    napi_value result = childprocess.GetExitCode();
-
-    int32_t res = 0;
-    napi_get_value_int32(env, result, &res);
-    ASSERT_EQ(static_cast<char>(res), 9);
-}
