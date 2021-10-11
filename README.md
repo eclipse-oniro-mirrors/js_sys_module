@@ -6,7 +6,7 @@
     -   [Interface description](#Interface description)
     -   [Interface instructions](#Interface instructions)
 
--   [Related warehouse]](#Related warehouse])
+-   [Related warehouse](#Related warehouse])
 
 ## Introduction
 Process is mainly used to obtain the relevant ID of the process, obtain and modify the working directory of the process, exit and close the process. The childprocess object can be used to create a new process. The main process can obtain the standard input and output of the child process, send signals and close the child process. 
@@ -74,10 +74,10 @@ base/compileruntime/js_sys_module/
 | exit(code:number):void | cause the node.js process to exit immediately. |
 | cwd():string |  returns the current working directory of the node.js process. |
 | off(type: string): boolean | clear the events stored by the user. True means the clearing is successful. |
-| runCmd(command: string, options?: { timeout : number, killSignal : number | string, maxBuffer : number }): ChildProcess |through runcmd, you can fork a new process to run a shell and return the childprocess object. The first parameter command refers to the shell to be run, and the second parameter options refers to some running parameters of the child process. These parameters mainly refer to timeout, killsignal and maxbuffer. If timeout is set, the child process will send a signal killsignal after timeout is exceeded. Maxbuffer is used to limit the maximum stdout and stderr sizes that can be received. |
-| wait()： Promise<number> | is used to wait for the child process to run and return the promise object, whose value is the exit code of the child process. |
-| getOutput(): Promise<Uint8Array> |  used to get the standard output of the child process. |
-| getErrorOutput(): Promise<Uint8Array> | used to get the standard error output of the child process. |
+| runCmd(command: string, options?: { timeout : number, killSignal : number \| string, maxBuffer : number }): ChildProcess |through runcmd, you can fork a new process to run a shell and return the childprocess object. The first parameter command refers to the shell to be run, and the second parameter options refers to some running parameters of the child process. These parameters mainly refer to timeout, killsignal and maxbuffer. If timeout is set, the child process will send a signal killsignal after timeout is exceeded. Maxbuffer is used to limit the maximum stdout and stderr sizes that can be received. |
+| wait()： Promise\<number> | is used to wait for the child process to run and return the promise object, whose value is the exit code of the child process. |
+| getOutput(): Promise\<Uint8Array> |  used to get the standard output of the child process. |
+| getErrorOutput(): Promise\<Uint8Array> | used to get the standard error output of the child process. |
 | getTid() :number | Returns the TID of the process. |
 | getStartRealtime() :number | Gets the real time elapsed (in milliseconds) from system startup to process startup. |
 | getAvailableCores() :number[] | Gets the CPU kernel available to the current process on the multi-core device. |
@@ -315,7 +315,7 @@ is64Bit(){
 30.getUidForName()
 ```
 getUidForName(){
-	var buf = "root";
+    var buf = "root";
     var ansu = Process.getUidForName(buf);
 }
 ```
@@ -334,7 +334,7 @@ getAvailableCores(){
 33.getThreadPriority()
 ```
 getThreadPriority(){
-	var result = Process.getTid();
+    var result = Process.getTid();
     var ansu = getThreadPriority(result);
 }
 ```

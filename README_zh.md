@@ -84,10 +84,10 @@ base/compileruntime/js_sys_module/
 | getThreadPriority(v:number): number | 根据指定的 TID 获取线程优先级。 |
 | getSystemConfig(name:number): number | 根据指定的系统配置名称获取系统的配置。 |
 | getEnvironmentVar(name:string): string | 根据环境变量的名称获取对应的值。 |
-| runCmd(command: string, options?: { timeout : number, killSignal : number | string, maxBuffer : number }): ChildProcess | 通过runcmd可以fork一个新的进程来运行一段shell，并返回ChildProcess对象。第一个参数command指需要运行的shell，第二个参数options指子进程的一些运行参数。这些参数主要指timeout、killSignal、maxBuffer 。如果设置了timeout则子进程会在超出timeout后发送信号killSignal，maxBuffer用来限制可接收的最大stdout和stderr大小。 |
-| wait()： Promise<number> | 用来等待子进程运行结束，返回promise对象，其值为子进程的退出码。 |
-| getOutput(): Promise<Uint8Array> | 用来获取子进程的标准输出。 |
-| getErrorOutput(): Promise<Uint8Array> | 用来获取子进程的标准错误输出。 |
+| runCmd(command: string, options?: { timeout : number, killSignal : number \| string, maxBuffer : number }): ChildProcess | 通过runcmd可以fork一个新的进程来运行一段shell，并返回ChildProcess对象。第一个参数command指需要运行的shell，第二个参数options指子进程的一些运行参数。这些参数主要指timeout、killSignal、maxBuffer 。如果设置了timeout则子进程会在超出timeout后发送信号killSignal，maxBuffer用来限制可接收的最大stdout和stderr大小。 |
+| wait():Promise\<number> | 用来等待子进程运行结束，返回promise对象，其值为子进程的退出码。 |
+| getOutput(): Promise\<Uint8Array> | 用来获取子进程的标准输出。 |
+| getErrorOutput(): Promise\<Uint8Array> | 用来获取子进程的标准错误输出。 |
 | close(): void | 用来关闭正在运行的子进程。 |
 | kill(signal: number \| string): void | 用来发送信号给子进程。 |
 | readonly killed: boolean | 表示信号是否发送成功，true代表发送成功。 |
@@ -314,7 +314,7 @@ is64Bit(){
 30.getUidForName()
 ```
 getUidForName(){
-	var buf = "root";
+    var buf = "root";
     var ansu = Process.getUidForName(buf);
 }
 ```
@@ -333,7 +333,7 @@ getAvailableCores(){
 33.getThreadPriority()
 ```
 getThreadPriority(){
-	var result = Process.getTid();
+    var result = Process.getTid();
     var ansu = getThreadPriority(result);
 }
 ```
