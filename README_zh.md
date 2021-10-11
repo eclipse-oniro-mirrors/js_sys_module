@@ -89,7 +89,7 @@ base/compileruntime/js_sys_module/
 | getOutput(): Promise<Uint8Array> | 用来获取子进程的标准输出。 |
 | getErrorOutput(): Promise<Uint8Array> | 用来获取子进程的标准错误输出。 |
 | close(): void | 用来关闭正在运行的子进程。 |
-| kill(signo: number): void | 用来发送信号给子进程。 |
+| kill(signal: number \| string): void | 用来发送信号给子进程。 |
 | readonly killed: boolean | 表示信号是否发送成功，true代表发送成功。 |
 | readonly exitCode: number | 表示子进程的退出码。 |
 | readonly pid: number | 代表子进程ID。 |

@@ -90,7 +90,7 @@ base/compileruntime/js_sys_module/
 | getSystemConfig(name:number): number | Gets the configuration of the system according to the specified system configuration name. |
 | getEnvironmentVar(name:string): string | Obtain the corresponding value according to the name of the environment variable. |
 | close(): void | used to close the running child process. |
-| kill(signo: number): void |  used to send signals to child processes. |
+| kill(signal: number \| string): void |  used to send signals to child processes. |
 | readonly killed: boolean | indicates whether the signal is sent successfully, and true indicates that the signal is sent successfully. |
 | readonly exitCode: number | indicates the exit code of the child process. |
 | readonly pid: number | represents the child process ID. |
