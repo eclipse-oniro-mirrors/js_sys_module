@@ -30,6 +30,17 @@ base/compileruntime/js_sys_module/
 ├── exit()                          # exit方法
 ├── cwd()                           # cwd方法
 ├── off()                           # off方法
+├── getTid()                        # getTid方法
+├── getStartRealtime()              # getStartRealtime方法
+├── getAvailableCores()             # getAvailableCores方法
+├── getPastCputime()                # getPastCputime方法
+├── isIsolatedProcess()             # isIsolatedProcess方法
+├── is64Bit()                       # is64Bit方法
+├── isAppUid()                      # isAppUid方法
+├── getUidForName()                 # getUidForName方法
+├── getThreadPriority()             # getThreadPriority方法
+├── getSystemConfig()               # getSystemConfig方法
+├── getEnvironmentVar()             # getEnvironmentVar方法
 ├── runCmd()                        # runCmd方法
 └─── Class:CHILDPROCESS             # CHILDPROCESS类
     ├── close()                     # close方法
@@ -48,13 +59,13 @@ base/compileruntime/js_sys_module/
 ### 接口说明
 | 接口名 | 说明 |
 | -------- | -------- |
-| getUid() :number | 返回进程的数字用户标识。 |
-| getGid() :number | 返回进程的数字组标识。 |
-| getEUid() :number | 返回进程的数字有效用户身份。 |
-| getEGid() :number | 返回 Node.js 进程的数字有效组标识。 |
-| getGroups() :number[] | 返回一个带有补充组 ID 的数组。 |
-| getPid() :number | 返回进程的 PID。 |
-| getPpid() :number | 返回当前进程的父进程的 PID。                                 |
+| readonly getUid :number | 返回进程的数字用户标识。 |
+| readonly getGid :number | 返回进程的数字组标识。 |
+| readonly getEuid :number | 返回进程的数字有效用户身份。 |
+| readonly getEgid :number | 返回 Node.js 进程的数字有效组标识。 |
+| readonly getGroups :number[] | 返回一个带有补充组 ID 的数组。 |
+| readonly getPid :number | 返回进程的 PID。 |
+| readonly getPpid :number | 返回当前进程的父进程的 PID。                                 |
 | chdir(dir:string) :void | 更改 Node.js 进程的当前工作目录。 |
 | uptime() :number | 返回当前系统已运行的秒数。 |
 | Kill(pid:number, signal:number) :boolean | 将signal信号发送到标识的进程 PID，true代表发送成功。 |
@@ -62,17 +73,27 @@ base/compileruntime/js_sys_module/
 | on(type:string ,listener:EventListener) :void | 用来存储用户所触发的事件。 |
 | exit(code:number):void | 会导致 Node.js 进程立即退出。 |
 | cwd():string | 返回 Node.js 进程的当前工作目录。 |
-| off(type: string): boolean | 会清除用户存储的事件，true代表清除成功。 |
-| runCmd(command : string, options?: RunOptions): ChildProcess | 通过runcmd可以fork一个新的进程来运行一段shell，并返回ChildProcess对象。第一个参数command指需要运行的shell，第二个参数options指子进程的一些运行参数。这些参数主要指timeout、killSignal、maxBuffer 。如果设置了timeout则子进程会在超出timeout后发送信号killSignal，maxBuffer用来限制可接收的最大stdout和stderr大小。 |
-| wait()： Promise | 用来等待子进程运行结束，返回promise对象，其值为子进程的退出码。 |
-| getOutput(): Promise | 用来获取子进程的标准输出。 |
-| getErrorOutput(): Promise | 用来获取子进程的标准错误输出。 |
+| getTid() :number | 返回进程的TID。 |
+| getStartRealtime() :number | 获取从系统启动到进程启动所经过的实时时间（以毫秒为单位）。 |
+| getAvailableCores() :number[] | 获取多核设备上当前进程可用的 CPU 内核。 |
+| getPastCputime() :number | 获取进程启动到当前时间的CPU时间（以毫秒为单位）。 |
+| isIsolatedProcess(): boolean | 检查进程是否被隔离。 |
+| is64Bit(): boolean | 检查进程是否在 64 位环境中运行。 |
+| isAppUid(v:number): boolean | 检查指定的 UID 是否属于特定应用程序。 |
+| getUidForName(v:string): number | 根据用户名获取用户所属的用户组ID。 |
+| getThreadPriority(v:number): number | 根据指定的 TID 获取线程优先级。 |
+| getSystemConfig(name:number): number | 根据指定的系统配置名称获取系统的配置。 |
+| getEnvironmentVar(name:string): string | 根据环境变量的名称获取对应的值。 |
+| runCmd(command: string, options?: { timeout : number, killSignal : number | string, maxBuffer : number }): ChildProcess | 通过runcmd可以fork一个新的进程来运行一段shell，并返回ChildProcess对象。第一个参数command指需要运行的shell，第二个参数options指子进程的一些运行参数。这些参数主要指timeout、killSignal、maxBuffer 。如果设置了timeout则子进程会在超出timeout后发送信号killSignal，maxBuffer用来限制可接收的最大stdout和stderr大小。 |
+| wait()： Promise<number> | 用来等待子进程运行结束，返回promise对象，其值为子进程的退出码。 |
+| getOutput(): Promise<Uint8Array> | 用来获取子进程的标准输出。 |
+| getErrorOutput(): Promise<Uint8Array> | 用来获取子进程的标准错误输出。 |
 | close(): void | 用来关闭正在运行的子进程。 |
 | kill(signo: number): void | 用来发送信号给子进程。 |
 | readonly killed: boolean | 表示信号是否发送成功，true代表发送成功。 |
 | readonly exitCode: number | 表示子进程的退出码。 |
-| pid | 代表子进程ID。 |
-| ppid | 代表主进程ID。 |
+| readonly pid: number | 代表子进程ID。 |
+| readonly ppid: number | 代表主进程ID。 |
 
 ### 使用说明
 
@@ -81,49 +102,42 @@ base/compileruntime/js_sys_module/
 ```
 getUid(){
     var res =  Process.getUid;
-    console.log("-------"+res);
 }
 ```
 2.getGid()
 ```
 getGid(){
     var result = Process.getGid;
-    console.log("-------"+result);
 }
 ```
 3.getEuid()
 ```
 getEuid(){
     var ans = Process.getEuid;
-    console.log("-------"+ans);
 }
 ```
 4.getEgid()
 ```
 getEgid(){
     var resb = Process.getEgid;
-    console.log("-------"+resb);
 }
 ```
 5.getGroups()
 ```
 getGroups(){
     var answer = Process.getGroups;
-    console.log("-------"+answer);
 }
 ```
 6.getPid() 
 ```
 getPid(){
     var result = Process.getPid;
-    console.log("-----"+result);
 }
 ```
 7.getPpid()
 ```
 getPpid(){
     var result = Process.getPpid;
-    console.log("---------"+result);
 }
 ```
 8.chdir()
@@ -136,14 +150,12 @@ chdir(){
 ```
 uptime(){
     var num = Process.uptime();
-    console.log("---------"+num);
 }
 ```
 10.kill()
 ```
 kill(){
     var ansu = Process.kill(5,23);
-    console.log("------"+ansu);
 }
 ```
 11.abort()
@@ -172,7 +184,6 @@ exit(){
 ```
 Cwd(){
     var result = Process.cwd();
-    console.log("----"+result);
 }
 ```
 15.off()
@@ -180,7 +191,6 @@ Cwd(){
 ```
 off(){
     var result =  Process.off("add");
-    console.log("---------"+result);
 }
 ```
 16.runCmd()
@@ -230,7 +240,6 @@ getErrorOutput(){
 close(){
     var child =  process.runCmd('ls; sleep 5s;')
     var result = child.close()
-    console.log(child.exitCode);
 }
 ```
 21.kill()
@@ -240,7 +249,6 @@ kill(){
     var result = child.kill('SIGHUP');
     child.wait();
     var temp = child.killed;
-    console.log(temp);
 }
 ```
 22.killed
@@ -249,7 +257,6 @@ kill(){
     var child = process.runCmd('ls; sleep 5;')
     child.kill(3);
     var killed_ = child.killed;
-    console.log(killed_);
     child.wait();
 }
 ```
@@ -260,7 +267,6 @@ kill(){
     child.kill(9);
     child.wait();
     var exitCode_ = child.exitCode;
-    console.log(exitCode_);
 }
 ```
 24.pid
@@ -269,7 +275,6 @@ pid
 {
     var child = process.runCmd('ls; sleep 5;')
     var pid_ = child.pid;
-    console.log(pid_);
     child.wait();
 }
 ```
@@ -279,11 +284,78 @@ ppid
 {
     var child = process.runCmd('ls; sleep 5;')
     var ppid_ = child.ppid;
-    console.log(ppid_);
     child.wait();
 }
 ```
-
+26.getTid()
+```
+getTid(){
+    var ansu = Process.getTid();
+}
+```
+27.isIsolatedProcess()
+```
+isIsolatedProcess(){
+    var ansu = Process.isIsolatedProcess()();
+}
+```
+28.isAppUid()
+```
+isAppUid(){
+    var ansu = Process.isAppUid(10000);
+}
+```
+29.is64Bit()
+```
+is64Bit(){
+    var ansu = Process.is64Bit();
+}
+```
+30.getUidForName()
+```
+getUidForName(){
+	var buf = "root";
+    var ansu = Process.getUidForName(buf);
+}
+```
+31.getEnvironmentVar()
+```
+getEnvironmentVar(){
+    var ansu = Process.getEnvironmentVar('USER');
+}
+```
+32.getAvailableCores()
+```
+getAvailableCores(){
+    var ansu = Process.getAvailableCores();
+}
+```
+33.getThreadPriority()
+```
+getThreadPriority(){
+	var result = Process.getTid();
+    var ansu = getThreadPriority(result);
+}
+```
+34.getStartRealtime()
+```
+getStartRealtime(){
+    var ansu = Process.getStartRealtime();
+}
+```
+35.getPastCputime()
+```
+getPastCputime(){
+    var ansu = Process.getPastCputime();
+}
+```
+36.getSystemConfig()
+```
+getSystemConfig(){
+    var _SC_ARG_MAX = 0;
+    var ansu = Process.getSystemConfig(_SC_ARG_MAX)
+}
+```
 
 ## 相关仓
 
