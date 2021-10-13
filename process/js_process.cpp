@@ -344,7 +344,7 @@ namespace OHOS::Js_sys_module::Process {
 
     napi_value Process::GetUidForName(napi_value name) const
     {
-        struct passwd *user;
+        struct passwd *user = nullptr;
         int32_t uid = 0;
         napi_value result = nullptr;
         char *buffer = nullptr;
@@ -386,8 +386,8 @@ namespace OHOS::Js_sys_module::Process {
 
     napi_value Process::GetStartRealtime() const
     {
-        struct timespec timespro;
-        struct timespec timessys;
+        struct timespec timespro = {0};
+        struct timespec timessys = {0};
         napi_value result = nullptr;
         auto res = clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &timespro);
         if (res != 0) {
@@ -427,7 +427,7 @@ namespace OHOS::Js_sys_module::Process {
 
     napi_value Process::GetPastCputime() const
     {
-        struct timespec times;
+        struct timespec times = {0};
         napi_value result = nullptr;
         auto res = clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &times);
         if (res != 0) {

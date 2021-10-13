@@ -88,7 +88,7 @@ namespace OHOS::Js_sys_module::Process {
         NAPI_CALL(env, napi_wrap(
             env, thisVar, objectInfo,
             [](napi_env env, void *data, void *hint) {
-                auto obj = (ChildProcess*)data;
+                auto obj = reinterpret_cast<ChildProcess*>(data);
                 if (obj != nullptr) {
                     delete obj;
                 }

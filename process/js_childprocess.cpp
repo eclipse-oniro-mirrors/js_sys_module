@@ -95,11 +95,11 @@ namespace OHOS::Js_sys_module::Process {
             napi_create_async_work(
                 env_, nullptr, resourceName, TimeoutListener,
                 [](napi_env env, napi_status status, void *data) {
-                    OptionsInfo *optionsInfo = (OptionsInfo*)data;
+                    OptionsInfo *optionsInfo = reinterpret_cast<OptionsInfo*>(data);
                     napi_delete_async_work(env, optionsInfo->worker);
                     delete optionsInfo;
                 },
-                (void*)optionsInfo_, &optionsInfo_->worker);
+                reinterpret_cast<void*>(optionsInfo_), &optionsInfo_->worker);
             napi_queue_async_work(env_, optionsInfo_->worker);
             close(stdErrFd_[1]);
             close(stdOutFd_[1]);
@@ -184,7 +184,7 @@ namespace OHOS::Js_sys_module::Process {
         napi_create_promise(env_, &stdOutInfo_->deferred, &stdOutInfo_->promise);
         napi_create_string_utf8(env_, "ReadStdOut", NAPI_AUTO_LENGTH, &resourceName);
         napi_create_async_work(env_, nullptr, resourceName, ReadStdOut, EndStdOut,
-                               (void*)stdOutInfo_, &stdOutInfo_->worker);
+                               reinterpret_cast<void*>(stdOutInfo_), &stdOutInfo_->worker);
         napi_queue_async_work(env_, stdOutInfo_->worker);
 
         // getstderr
@@ -197,14 +197,17 @@ namespace OHOS::Js_sys_module::Process {
         napi_create_promise(env_, &stdErrInfo_->deferred, &stdErrInfo_->promise);
         napi_create_string_utf8(env_, "ReadStdErr", NAPI_AUTO_LENGTH, &resourceName);
         napi_create_async_work(env_, nullptr, resourceName, ReadStdErr, EndStdErr,
-                               (void*)stdErrInfo_, &stdErrInfo_->worker);
+                               reinterpret_cast<void*>(stdErrInfo_), &stdErrInfo_->worker);
         napi_queue_async_work(env_, stdErrInfo_->worker);
     }
 
     void ChildProcess::ReadStdOut(napi_env env, void *data)
     {
-        auto stdOutInfo = (StdInfo*)data;
+        auto stdOutInfo = reinterpret_cast<StdInfo*>(data);
         char childStdout[MAXSIZE] = {0};
+        if (stdOutInfo->isNeedRun == nullptr) {
+            return;
+        }
         while (*(stdOutInfo->isNeedRun)) {
             read(stdOutInfo->fd, childStdout, sizeof(childStdout) - 1);
             if (strlen(childStdout) > 0) {
@@ -218,7 +221,7 @@ namespace OHOS::Js_sys_module::Process {
                     HILOG_ERROR("stdOut maxBuff kill signal failed");
                 }
             }
-            if (memset_s(childStdout, MAXSIZE, '\0', MAXSIZE - 1) != 0) {
+            if (memset_s(childStdout, sizeof(childStdout), '\0', MAXSIZE) != 0) {
                 HILOG_ERROR("getOutput memset_s failed");
                 return;
             }
@@ -227,12 +230,12 @@ namespace OHOS::Js_sys_module::Process {
 
     void ChildProcess::EndStdOut(napi_env env, napi_status status, void *buffer)
     {
-        auto stdOutInfo = (StdInfo*)buffer;
+        auto stdOutInfo = reinterpret_cast<StdInfo*>(buffer);
         void *data = nullptr;
         napi_value arrayBuffer = nullptr;
         size_t bufferSize = stdOutInfo->stdData.size() + 1;
         napi_create_arraybuffer(env, bufferSize, &data, &arrayBuffer);
-        if (memcpy_s(data, bufferSize, (const void*)stdOutInfo->stdData.c_str(),
+        if (memcpy_s(data, bufferSize, reinterpret_cast<const void*>(stdOutInfo->stdData.c_str()),
             stdOutInfo->stdData.size()) != 0) {
             HILOG_ERROR("getOutput memcpy_s failed");
             napi_delete_async_work(env, stdOutInfo->worker);
@@ -248,8 +251,11 @@ namespace OHOS::Js_sys_module::Process {
 
     void ChildProcess::ReadStdErr(napi_env env, void *data)
     {
-        auto stdErrInfo = (StdInfo*)data;
+        auto stdErrInfo = reinterpret_cast<StdInfo*>(data);
         char childStderr[MAXSIZE] = {0};
+        if (stdErrInfo->isNeedRun == nullptr) {
+            return;
+        }
         while (*(stdErrInfo->isNeedRun)) {
             read(stdErrInfo->fd, childStderr, sizeof(childStderr) - 1);
             if (strlen(childStderr) > 0) {
@@ -263,7 +269,7 @@ namespace OHOS::Js_sys_module::Process {
                     HILOG_ERROR("stdErr maxBuff kill signal failed");
                 }
             }
-            if (memset_s(childStderr, MAXSIZE, '\0', MAXSIZE - 1) != 0) {
+            if (memset_s(childStderr, sizeof(childStderr), '\0', MAXSIZE) != 0) {
                 HILOG_ERROR("getOutput memset_s failed");
                 return;
             }
@@ -272,12 +278,12 @@ namespace OHOS::Js_sys_module::Process {
 
     void ChildProcess::EndStdErr(napi_env env, napi_status status, void *buffer)
     {
-        auto stdErrInfo = (StdInfo*)buffer;
+        auto stdErrInfo = reinterpret_cast<StdInfo*>(buffer);
         void *data = nullptr;
         napi_value arrayBuffer = nullptr;
         size_t bufferSize = stdErrInfo->stdData.size() + 1;
         napi_create_arraybuffer(env, bufferSize, &data, &arrayBuffer);
-        if (memcpy_s(data, bufferSize, (const void*)stdErrInfo->stdData.c_str(),
+        if (memcpy_s(data, bufferSize, reinterpret_cast<const void*>(stdErrInfo->stdData.c_str()),
             stdErrInfo->stdData.size()) != 0) {
             HILOG_ERROR("getErrOutput memcpy_s failed");
             napi_delete_async_work(env, stdErrInfo->worker);
@@ -344,8 +350,8 @@ namespace OHOS::Js_sys_module::Process {
     void ChildProcess::TimeoutListener(napi_env env, void *data)
     {
         std::vector<int32_t> signalType = {SIGINT, SIGQUIT, SIGKILL, SIGTERM};
-        auto temp = (OptionsInfo*)data;
-        int32_t timeout = temp->timeout * TIME_EXCHANGE;
+        auto temp = reinterpret_cast<OptionsInfo*>(data);
+        int32_t timeout = temp->timeout * 1000; // 1000:TIME_EXCHANGE
         if (timeout > 0) {
             usleep(timeout);
             if (*(temp->isNeedRun)) {
