@@ -15,13 +15,13 @@ process主要是获取进程的相关id以及获取和修改进程的工作目�
 ```
 base/compileruntime/js_sys_module/
 ├── Class:PROCESS                   # PROCESS类
-├── Uid                             # Uid属性
-├── Gid                             # Gid属性
-├── EUid                            # EUid属性
-├── EGid                            # EGid属性
-├── Groups                          # Groups属性
-├── Pid                             # Pid属性
-├── Ppid                            # Ppid属性
+├── uid                             # uid属性
+├── gid                             # gid属性
+├── euid                            # euid属性
+├── egid                            # egid属性
+├── groups                          # groups属性
+├── pid                             # pid属性
+├── ppid                            # ppid属性
 ├── chdir()                         # chdir方法
 ├── uptime()                        # uptime方法
 ├── kill()                          # kill方法
@@ -30,7 +30,7 @@ base/compileruntime/js_sys_module/
 ├── exit()                          # exit方法
 ├── cwd()                           # cwd方法
 ├── off()                           # off方法
-├── getTid()                        # getTid方法
+├── tid                             # tid方法
 ├── getStartRealtime()              # getStartRealtime方法
 ├── getAvailableCores()             # getAvailableCores方法
 ├── getPastCputime()                # getPastCputime方法
@@ -59,13 +59,13 @@ base/compileruntime/js_sys_module/
 ### 接口说明
 | 接口名 | 说明 |
 | -------- | -------- |
-| readonly getUid :number | 返回进程的数字用户标识。 |
-| readonly getGid :number | 返回进程的数字组标识。 |
-| readonly getEuid :number | 返回进程的数字有效用户身份。 |
-| readonly getEgid :number | 返回 Node.js 进程的数字有效组标识。 |
-| readonly getGroups :number[] | 返回一个带有补充组 ID 的数组。 |
-| readonly getPid :number | 返回进程的 PID。 |
-| readonly getPpid :number | 返回当前进程的父进程的 PID。                                 |
+| const uid :number | 返回进程的数字用户标识。 |
+| const gid :number | 返回进程的数字组标识。 |
+| const euid :number | 返回进程的数字有效用户身份。 |
+| const egid :number | 返回 Node.js 进程的数字有效组标识。 |
+| const groups :number[] | 返回一个带有补充组 ID 的数组。 |
+| const pid :number | 返回进程的 PID。 |
+| const ppid :number | 返回当前进程的父进程的 PID。                                 |
 | chdir(dir:string) :void | 更改 Node.js 进程的当前工作目录。 |
 | uptime() :number | 返回当前系统已运行的秒数。 |
 | Kill(pid:number, signal:number) :boolean | 将signal信号发送到标识的进程 PID，true代表发送成功。 |
@@ -73,7 +73,7 @@ base/compileruntime/js_sys_module/
 | on(type:string ,listener:EventListener) :void | 用来存储用户所触发的事件。 |
 | exit(code:number):void | 会导致 Node.js 进程立即退出。 |
 | cwd():string | 返回 Node.js 进程的当前工作目录。 |
-| getTid() :number | 返回进程的TID。 |
+| const tid :number | 返回进程的TID。 |
 | getStartRealtime() :number | 获取从系统启动到进程启动所经过的实时时间（以毫秒为单位）。 |
 | getAvailableCores() :number[] | 获取多核设备上当前进程可用的 CPU 内核。 |
 | getPastCputime() :number | 获取进程启动到当前时间的CPU时间（以毫秒为单位）。 |
@@ -98,46 +98,46 @@ base/compileruntime/js_sys_module/
 ### 使用说明
 
 各接口使用方法如下：
-1.getUid() 
+1.uid() 
 ```
-getUid(){
-    var res =  Process.getUid;
+uid(){
+    var res =  Process.uid;
 }
 ```
-2.getGid()
+2.gid()
 ```
-getGid(){
-    var result = Process.getGid;
+gid(){
+    var result = Process.gid;
 }
 ```
-3.getEuid()
+3.euid()
 ```
-getEuid(){
-    var ans = Process.getEuid;
+euid(){
+    var ans = Process.euid;
 }
 ```
-4.getEgid()
+4.egid()
 ```
-getEgid(){
-    var resb = Process.getEgid;
+egid(){
+    var resb = Process.egid;
 }
 ```
-5.getGroups()
+5.groups()
 ```
-getGroups(){
-    var answer = Process.getGroups;
+groups(){
+    var answer = Process.groups;
 }
 ```
-6.getPid() 
+6.pid() 
 ```
-getPid(){
-    var result = Process.getPid;
+pid(){
+    var result = Process.pid;
 }
 ```
-7.getPpid()
+7.ppid()
 ```
-getPpid(){
-    var result = Process.getPpid;
+ppid(){
+    var result = Process.ppid;
 }
 ```
 8.chdir()
@@ -287,10 +287,10 @@ ppid
     child.wait();
 }
 ```
-26.getTid()
+26.tid()
 ```
-getTid(){
-    var ansu = Process.getTid();
+tid(){
+    var ansu = Process.tid;
 }
 ```
 27.isIsolatedProcess()
