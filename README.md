@@ -15,19 +15,19 @@ Process is mainly used to obtain the relevant ID of the process, obtain and modi
 ```
 base/compileruntime/js_sys_module/
 ├── Class:PROCESS                   # class of PROCESS
-├── Uid                             # attribute of Uid
-├── Gid                             # attribute of Gid
-├── EUid                            # attribute of EUid
-├── EGid                            # attribute of EGid
-├── Groups                          # attribute of Groups
-├── Pid                             # attribute of Pid
-├── Ppid                            # attribute of Ppid
+├── uid                             # attribute of uid
+├── gid                             # attribute of gid
+├── euid                            # attribute of euid
+├── egid                            # attribute of egid
+├── groups                          # attribute of groups
+├── pid                             # attribute of pid
+├── ppid                            # attribute of ppid
 ├── chdir()                         # method of chdir
 ├── uptime()                        # method of uptime
 ├── kill()                          # method of kill
 ├── abort()                         # method of abort
 ├── on()                            # method of on
-├── getTid()                        # method of getTid方法
+├── tid                             # method of tid
 ├── getStartRealtime()              # method of getStartRealtime
 ├── getAvailableCores()             # method of getAvailableCores
 ├── getPastCputime()                # method of getPastCputime
@@ -59,13 +59,13 @@ base/compileruntime/js_sys_module/
 ### Interface description
 | Interface name | description |
 | -------- | -------- |
-| readonly getUid :number | returns the digital user ID of the process. |
-| readonly getGid :number | returns the numeric group ID of the process. |
-| readonly getEuid :number | returns the numeric valid user identity of the process. |
-| readonly getEgid :number | returns the numeric valid group ID of the node.js process. |
-| readonly getGroups :number[] |  returns an array with supplementary group ID. |
-| readonly getPid :number | returns the PID of the process. |
-| readonly getPpid :number |  returns the PID of the parent process of the current process. |
+| const uid :number | returns the digital user ID of the process. |
+| const gid :number | returns the numeric group ID of the process. |
+| const euid :number | returns the numeric valid user identity of the process. |
+| const egid :number | returns the numeric valid group ID of the node.js process. |
+| const groups :number[] |  returns an array with supplementary group ID. |
+| const pid :number | returns the PID of the process. |
+| const ppid :number |  returns the PID of the parent process of the current process. |
 | chdir(dir:string) :void | change the current working directory of the node.js process. |
 | uptime() :number |  returns the number of seconds the current system has been running. |
 | Kill(pid:number, signal:number) :boolean | send the signal to the identified process PID, and true means the sending is successful. |
@@ -78,7 +78,7 @@ base/compileruntime/js_sys_module/
 | wait()： Promise\<number> | is used to wait for the child process to run and return the promise object, whose value is the exit code of the child process. |
 | getOutput(): Promise\<Uint8Array> |  used to get the standard output of the child process. |
 | getErrorOutput(): Promise\<Uint8Array> | used to get the standard error output of the child process. |
-| getTid() :number | Returns the TID of the process. |
+| const tid:number | Returns the TID of the process. |
 | getStartRealtime() :number | Gets the real time elapsed (in milliseconds) from system startup to process startup. |
 | getAvailableCores() :number[] | Gets the CPU kernel available to the current process on the multi-core device. |
 | getPastCputime() :number | Gets the CPU time (in milliseconds) from the start of the process to the current time. |
@@ -99,46 +99,46 @@ base/compileruntime/js_sys_module/
 ### Interface instructions
 
 Example of using interface：
-1.getUid() 
+1.uid() 
 ```
-getUid(){
-    var res =  Process.getUid;
+uid(){
+    var res =  Process.uid;
 }
 ```
-2.getGid()
+2.gid()
 ```
-getGid(){
-    var result = Process.getGid;
+gid(){
+    var result = Process.gid;
 }
 ```
-3.getEuid()
+3.euid()
 ```
-getEuid(){
-    var ans = Process.getEuid;
+euid(){
+    var ans = Process.euid;
 }
 ```
-4.getEgid()
+4.egid()
 ```
-getEgid(){
-    var resb = Process.getEgid;
+egid(){
+    var resb = Process.egid;
 }
 ```
-5.getGroups()
+5.groups()
 ```
-getGroups(){
-    var answer = Process.getGroups;
+groups(){
+    var answer = Process.groups;
 }
 ```
-6.getPid() 
+6.pid() 
 ```
-getPid(){
-    var result = Process.getPid;
+pid(){
+    var result = Process.pid;
 }
 ```
-7.getPpid()
+7.ppid()
 ```
-getPpid(){
-    var result = Process.getPpid;
+ppid(){
+    var result = Process.ppid;
 }
 ```
 8.chdir()
@@ -288,10 +288,10 @@ ppid
     child.wait();
 }
 ```
-26.getTid()
+26.tid()
 ```
-getTid(){
-    var ansu = Process.getTid();
+tid(){
+    var ansu = Process.tid;
 }
 ```
 27.isIsolatedProcess()
