@@ -574,7 +574,7 @@ namespace OHOS::Js_sys_module::Process {
         NAPI_CALL(env_, napi_get_undefined(env_, &res));
         return res;
     }
-	void Process::ClearReference(napi_env env)
+    void Process::ClearReference(napi_env env)
     {
         auto iter = eventMap.begin();
         while (iter != eventMap.end()) {
@@ -586,5 +586,4 @@ namespace OHOS::Js_sys_module::Process {
         }
         eventMap.clear();
     }
-
 } // namespace

@@ -65,7 +65,7 @@ namespace OHOS::Js_sys_module::Process {
                                 || propertyType == napi_undefined,
                                 "Wrong KillSignal argument typr. String or number expected");
                     break;
-                case 2:
+                case 2: // 2:The parameter value
                     NAPI_CALL(env, napi_typeof(env, property, &propertyType));
                     NAPI_ASSERT(env, propertyType == napi_number || propertyType == napi_undefined,
                                 "Wrong maxBuffer argument typr. Number expected");

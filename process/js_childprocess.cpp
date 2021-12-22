@@ -81,11 +81,11 @@ namespace OHOS::Js_sys_module::Process {
             close(stdErrFd_[0]);
             close(stdOutFd_[0]);
             dup2(stdOutFd_[1], 1);
-            dup2(stdErrFd_[1], 2);
+            dup2(stdErrFd_[1], 2); // 2:The parameter value
             std::string strCommnd = RequireStrValue(command);
             if (execl("/bin/sh", "sh", "-c", strCommnd.c_str(), NULL) == -1) {
                 HILOG_ERROR("execl command failed");
-                exit(127);
+                exit(127); // 127:The parameter value
             }
         } else if (pid > 0) {
             optionsInfo_->pid = pid;
@@ -380,7 +380,7 @@ namespace OHOS::Js_sys_module::Process {
                 case 1:
                     optionsInfo_->killSignal = GetValidSignal(property);
                     break;
-                case 2:
+                case 2: // 2:The parameter value
                     status = napi_get_value_int64(env_, property, &optionsInfo_->maxBuffer);
                     if (status != napi_ok) {
                         optionsInfo_->maxBuffer = MAXSIZE * MAXSIZE;

@@ -24,7 +24,7 @@
 #include "napi/native_node_api.h"
 
 namespace OHOS::Js_sys_module::Process {
-	using ClearRefCallback = void (*)(napi_env env);
+    using ClearRefCallback = void (*)(napi_env env);
     enum class PromiseRejectionEvent : uint32_t { REJECT = 0, HANDLE };
     class Process {
     public:
@@ -57,8 +57,8 @@ namespace OHOS::Js_sys_module::Process {
         napi_value GetAvailableCores() const;
         napi_value GetEnvironmentVar(napi_value name) const;
         napi_value SetRejectionCallback() const;
-		
-		static void ClearReference(napi_env env);
+
+        static void ClearReference(napi_env env);
     private:
         double ConvertTime(time_t tvsec, long tvnsec) const;
     private:
