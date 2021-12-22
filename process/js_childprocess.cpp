@@ -28,6 +28,8 @@
 #include "utils/log.h"
 
 namespace OHOS::Js_sys_module::Process {
+    constexpr int MAXSIZE = 1024;
+    constexpr int TIME_EXCHANGE = 1000;
     std::map<std::string, int> g_signalsMap = {
         {"SIGHUP", 1},
         {"SIGINT", 2},
