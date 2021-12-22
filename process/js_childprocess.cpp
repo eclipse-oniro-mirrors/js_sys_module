@@ -81,7 +81,7 @@ namespace OHOS::Js_sys_module::Process {
             close(stdErrFd_[0]);
             close(stdOutFd_[0]);
             dup2(stdOutFd_[1], 1);
-            dup2(stdErrFd_[1], 2); // 2:The parameter value
+            dup2(stdErrFd_[1], 2); // 2:The value of parameter
             std::string strCommnd = RequireStrValue(command);
             if (execl("/bin/sh", "sh", "-c", strCommnd.c_str(), NULL) == -1) {
                 HILOG_ERROR("execl command failed");
