@@ -12,7 +12,6 @@
       "inner_kits": [
       ],
       "test_list": [
-        "//base/compileruntime/js_sys_module/test/unittest:unittest"
       ]
     }
   }
