@@ -568,8 +568,6 @@ namespace OHOS::Js_sys_module::Process {
         NAPI_CALL(env_, napi_create_function(env_, cbName.c_str(), cbName.size(), CheckUnhandleRejections,
                                              nullptr, &checkcb));
         NAPI_CALL(env_, napi_create_reference(env_, checkcb, 1, &checkUnhandleRejectionsRef));
-        //NAPI_CALL(env_, napi_set_promise_rejection_callback(env_, unHandleRejectionCallbackRef,
-        //                                                    checkUnhandleRejectionsRef));
         napi_value res = nullptr;
         NAPI_CALL(env_, napi_get_undefined(env_, &res));
         return res;
