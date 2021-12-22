@@ -17,11 +17,11 @@
 #define BASE_COMPILERUNTIME_JS_SYS_MODULE_CHILD_PROCESS_CLASS_H
 
 #include <string>
-#include <unistd.h>
+#include <sys/types.h>
+
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 namespace OHOS::Js_sys_module::Process {
-    constexpr int MAXSIZE = 1024;
     struct WaitInfo {
         napi_async_work worker = nullptr;
         napi_deferred deferred = nullptr;
@@ -65,19 +65,19 @@ namespace OHOS::Js_sys_module::Process {
         virtual ~ChildProcess();
 
     private:
-        static void ReadStdOut(napi_env env, void *data);
-        static void EndStdOut(napi_env env, napi_status status, void *buffer);
-        static void ReadStdErr(napi_env env, void *data);
-        static void EndStdErr(napi_env env, napi_status status, void *buffer);
-        static void TimeoutListener(napi_env env, void *data);
+        static void ReadStdOut(napi_env env, void* data);
+        static void EndStdOut(napi_env env, napi_status status, void* buffer);
+        static void ReadStdErr(napi_env env, void* data);
+        static void EndStdErr(napi_env env, napi_status status, void* buffer);
+        static void TimeoutListener(napi_env env, void* data);
         std::string RequireStrValue(const napi_value strValue);
         int GetValidSignal(const napi_value signo);
         void CreatePromise();
 
         napi_env env_ = nullptr;
-        OptionsInfo *optionsInfo_ = nullptr;
-        StdInfo *stdOutInfo_ = nullptr;
-        StdInfo *stdErrInfo_ = nullptr;
+        OptionsInfo* optionsInfo_ = nullptr;
+        StdInfo* stdOutInfo_ = nullptr;
+        StdInfo* stdErrInfo_ = nullptr;
 
         int exitCode_ = 0;
         int stdOutFd_[2] = {0};

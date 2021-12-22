@@ -15,13 +15,13 @@ Process is mainly used to obtain the relevant ID of the process, obtain and modi
 ```
 base/compileruntime/js_sys_module/
 ├── Class:PROCESS                   # class of PROCESS
-├── uid                             # attribute of uid
-├── gid                             # attribute of gid
-├── euid                            # attribute of euid
-├── egid                            # attribute of egid
-├── groups                          # attribute of groups
-├── pid                             # attribute of pid
-├── ppid                            # attribute of ppid
+├── Uid                             # attribute of Uid
+├── Gid                             # attribute of Gid
+├── EUid                            # attribute of EUid
+├── EGid                            # attribute of EGid
+├── Groups                          # attribute of Groups
+├── Pid                             # attribute of Pid
+├── Ppid                            # attribute of Ppid
 ├── chdir()                         # method of chdir
 ├── uptime()                        # method of uptime
 ├── kill()                          # method of kill
@@ -99,7 +99,7 @@ base/compileruntime/js_sys_module/
 ### Interface instructions
 
 Example of using interface：
-1.uid() 
+1.uid()
 ```
 uid(){
     var res =  Process.uid;
@@ -129,7 +129,7 @@ groups(){
     var answer = Process.groups;
 }
 ```
-6.pid() 
+6.pid()
 ```
 pid(){
     var result = Process.pid;
@@ -288,7 +288,7 @@ ppid
     child.wait();
 }
 ```
-26.tid()
+26.tid
 ```
 tid(){
     var ansu = Process.tid;
