@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,8 @@ namespace OHOS::Js_sys_module::Process {
     namespace {
         constexpr int NUM_OF_DATA = 4;
         constexpr int PER_USER_RANGE = 100000;
+        constexpr int32_t NAPI_RETURN_ZERO = 0;
+        constexpr int32_t NAPI_RETURN_ONE = 1;
     }
     thread_local std::multimap<std::string, napi_ref> eventMap;
     thread_local std::map<napi_ref, napi_ref> pendingUnHandledRejections;
@@ -92,16 +94,16 @@ namespace OHOS::Js_sys_module::Process {
         if (std::find(pgrous.begin(), pgrous.end(), proegid) == pgrous.end()) {
             pgrous.push_back(proegid);
         }
-        std::vector<uint32_t> arry;
+        std::vector<uint32_t> array;
         for (auto iter = pgrous.begin(); iter != pgrous.end(); iter++) {
-            auto recive = static_cast<uint32_t>(*iter);
-            arry.push_back(recive);
+            auto receive = static_cast<uint32_t>(*iter);
+            array.push_back(receive);
         }
         NAPI_CALL(env_, napi_create_array(env_, &result));
-        size_t len = arry.size();
+        size_t len = array.size();
         for (size_t i = 0; i < len; i++) {
             napi_value numvalue = nullptr;
-            NAPI_CALL(env_, napi_create_uint32(env_, arry[i], &numvalue));
+            NAPI_CALL(env_, napi_create_uint32(env_, array[i], &numvalue));
             NAPI_CALL(env_, napi_set_element(env_, result, i, numvalue));
         }
         return result;
@@ -126,23 +128,18 @@ namespace OHOS::Js_sys_module::Process {
     void Process::Chdir(napi_value args) const
     {
         size_t prolen = 0;
-        napi_get_value_string_utf8(env_, args, nullptr, 0, &prolen);
-        char* path = nullptr;
-        if (prolen > 0) {
-            path = new char[prolen + 1];
-            if (memset_s(path, prolen + 1, '\0', prolen + 1) != 0) {
-                napi_throw_error(env_, "-1", "chdir path memset_s failed");
-            }
-        } else {
-            napi_throw_error(env_, "-2", "prolen is error !");
+        if (napi_get_value_string_utf8(env_, args, nullptr, 0, &prolen) != napi_ok) {
+            HILOG_ERROR("can not get args size");
+            return;
         }
-        napi_get_value_string_utf8(env_, args, path, prolen + 1, &prolen);
+        std::string result = "";
+        result.resize(prolen);
+        if (napi_get_value_string_utf8(env_, args, result.data(), prolen + 1, &prolen) != napi_ok) {
+            HILOG_ERROR("can not get args value");
+            return;
+        }
         int proerr = 0;
-        if (path != nullptr) {
-            proerr = uv_chdir(path);
-            delete []path;
-            path = nullptr;
-        }
+        proerr = uv_chdir(result.c_str());
         if (proerr) {
             napi_throw_error(env_, "-1", "chdir");
         }
@@ -156,7 +153,7 @@ namespace OHOS::Js_sys_module::Process {
         napi_get_value_int32(env_, signal, &sig);
         uv_pid_t ownPid = uv_os_getpid();
         // 64:The maximum valid signal value is 64.
-        if (sig > 64 && (pid == 0 || pid == -1 || pid == ownPid || pid == -ownPid)) {
+        if (sig > 64 && (!pid || pid == -1 || pid == ownPid || pid == -ownPid)) {
             napi_throw_error(env_, "0", "process exit");
         }
         bool flag = false;
@@ -215,13 +212,18 @@ namespace OHOS::Js_sys_module::Process {
 
     void Process::On(napi_value str, napi_value function)
     {
-        char *buffer = nullptr;
+        std::string result = "";
         size_t bufferSize = 0;
-        napi_get_value_string_utf8(env_, str, buffer, 0, &bufferSize);
-        if (bufferSize > 0) {
-            buffer = new char[bufferSize + 1];
+        if (napi_get_value_string_utf8(env_, str, nullptr, NAPI_RETURN_ZERO, &bufferSize) != napi_ok) {
+            HILOG_ERROR("can not get str size");
+            return;
         }
-        napi_get_value_string_utf8(env_, str, buffer, bufferSize + 1, &bufferSize);
+        result.resize(bufferSize);
+        if (napi_get_value_string_utf8(env_, str, result.data(), bufferSize + NAPI_RETURN_ONE,
+                                       &bufferSize) != napi_ok) {
+            HILOG_ERROR("can not get str value");
+            return;
+        }
         if (function == nullptr) {
             HILOG_ERROR("function is nullptr");
             return;
@@ -232,47 +234,41 @@ namespace OHOS::Js_sys_module::Process {
             HILOG_ERROR("napi_create_reference is failed");
             return;
         }
-        if (buffer != nullptr) {
-            size_t pos = events.find(buffer);
+        if (!result.empty()) {
+            size_t pos = events.find(result);
             if (pos == std::string::npos) {
                 HILOG_ERROR("illegal event");
                 return;
             }
-            eventMap.insert(std::make_pair(buffer, myCallRef));
-            delete []buffer;
-            buffer = nullptr;
+            eventMap.insert(std::make_pair(result, myCallRef));
         }
     }
 
     napi_value Process::Off(napi_value str)
     {
-        char *buffer = nullptr;
         size_t bufferSize = 0;
         bool flag = false;
-        NAPI_CALL(env_, napi_get_value_string_utf8(env_, str, buffer, 0, &bufferSize));
-        NAPI_ASSERT(env_, bufferSize > 0, "bufferSize == 0");
-        buffer = new char[bufferSize + 1];
-        if (memset_s(buffer, bufferSize + 1, 0, bufferSize + 1) != 0) {
-            HILOG_ERROR("buffer memset error");
-            delete []buffer;
+        if (napi_get_value_string_utf8(env_, str, nullptr, 0, &bufferSize) != napi_ok) {
+            HILOG_ERROR("can not get str size");
             return nullptr;
         }
-        napi_get_value_string_utf8(env_, str, buffer, bufferSize + 1, &bufferSize);
-        std::string temp = "";
-        if (buffer != nullptr) {
-            temp = buffer;
-            delete []buffer;
-            buffer = nullptr;
+        std::string result = "";
+        result.resize(bufferSize);
+        if (napi_get_value_string_utf8(env_, str, result.data(), bufferSize + 1, &bufferSize) != napi_ok) {
+            HILOG_ERROR("can not get str value");
+            return nullptr;
         }
+        std::string temp = "";
+        temp = result;
         auto iter = eventMap.equal_range(temp);
         while (iter.first != iter.second) {
             NAPI_CALL(env_, napi_delete_reference(env_, iter.first->second));
             iter.first = eventMap.erase(iter.first);
             flag = true;
         }
-        napi_value result = nullptr;
-        NAPI_CALL(env_, napi_get_boolean(env_, flag, &result));
-        return result;
+        napi_value convertResult = nullptr;
+        NAPI_CALL(env_, napi_get_boolean(env_, flag, &convertResult));
+        return convertResult;
     }
 
     napi_value Process::GetTid() const
@@ -290,7 +286,7 @@ namespace OHOS::Js_sys_module::Process {
         auto prouid = static_cast<int32_t>(getuid());
         auto uid = prouid % PER_USER_RANGE;
         if ((uid >= 99000 && uid <= 99999) || // 99999:Only isolateuid numbers between 99000 and 99999.
-            (uid >= 9000 && uid <= 98999)) { // 98999:Only appuid numbers betweeen 9000 and 98999.
+            (uid >= 9000 && uid <= 98999)) { // 98999:Only appuid numbers between 9000 and 98999.
             NAPI_CALL(env_, napi_get_boolean(env_, flag, &result));
             return result;
         }
@@ -333,57 +329,57 @@ namespace OHOS::Js_sys_module::Process {
 
     napi_value Process::GetEnvironmentVar(napi_value name) const
     {
-        char *buffer = nullptr;
-        napi_value result = nullptr;
+        napi_value convertResult = nullptr;
         char buf[260 * NUM_OF_DATA] = { 0 }; // 260:Only numbers path String size is 260.
         size_t length = sizeof(buf);
         size_t bufferSize = 0;
-        napi_get_value_string_utf8(env_, name, buffer, 0, &bufferSize);
-        if (bufferSize > 0) {
-            buffer = new char[bufferSize + 1];
+        if (napi_get_value_string_utf8(env_, name, nullptr, 0, &bufferSize) != napi_ok) {
+            HILOG_ERROR("can not get name size");
+            return nullptr;
         }
-        napi_get_value_string_utf8(env_, name, buffer, bufferSize + 1, &bufferSize);
+        std::string result = "";
+        result.resize(bufferSize);
+        if (napi_get_value_string_utf8(env_, name, result.data(), bufferSize + 1, &bufferSize) != napi_ok) {
+            HILOG_ERROR("can not get name value");
+            return nullptr;
+        }
         std::string temp = "";
-        if (buffer != nullptr) {
-            temp = buffer;
-            delete []buffer;
-            buffer = nullptr;
-        }
+        temp = result;
         auto envNum = uv_os_getenv(temp.c_str(), buf, &length);
         if (envNum == UV_ENOENT) {
-            NAPI_CALL(env_, napi_get_undefined(env_, &result));
-            return result;
+            NAPI_CALL(env_, napi_get_undefined(env_, &convertResult));
+            return convertResult;
         }
-        napi_create_string_utf8(env_, buf, strlen(buf), &result);
-        return result;
+        napi_create_string_utf8(env_, buf, strlen(buf), &convertResult);
+        return convertResult;
     }
 
     napi_value Process::GetUidForName(napi_value name) const
     {
         struct passwd *user = nullptr;
         int32_t uid = 0;
-        napi_value result = nullptr;
-        char *buffer = nullptr;
+        napi_value convertResult = nullptr;
         size_t bufferSize = 0;
-        napi_get_value_string_utf8(env_, name, buffer, 0, &bufferSize);
-        if (bufferSize > 0) {
-            buffer = new char[bufferSize + 1];
+        if (napi_get_value_string_utf8(env_, name, nullptr, 0, &bufferSize) != napi_ok) {
+            HILOG_ERROR("can not get name size");
+            return nullptr;
         }
-        napi_get_value_string_utf8(env_, name, buffer, bufferSize + 1, &bufferSize);
+        std::string result = "";
+        result.resize(bufferSize);
+        if (napi_get_value_string_utf8(env_, name, result.data(), bufferSize + 1, &bufferSize) != napi_ok) {
+            HILOG_ERROR("can not get name value");
+            return nullptr;
+        }
         std::string temp = "";
-        if (buffer != nullptr) {
-            temp = buffer;
-            delete []buffer;
-            buffer = nullptr;
-        }
+        temp = result;
         user = getpwnam(temp.c_str());
         if (user != nullptr) {
             uid = static_cast<int32_t>(user->pw_uid);
-            napi_create_int32(env_, uid, &result);
-            return result;
+            napi_create_int32(env_, uid, &convertResult);
+            return convertResult;
         }
-        napi_create_int32(env_, (-1), &result);
-        return result;
+        napi_create_int32(env_, (-1), &convertResult);
+        return convertResult;
     }
 
     napi_value Process::GetThreadPriority(napi_value tid) const
@@ -393,7 +389,7 @@ namespace OHOS::Js_sys_module::Process {
         napi_value result = nullptr;
         napi_get_value_int32(env_, tid, &proTid);
         int32_t pri = getpriority(PRIO_PROCESS, proTid);
-        if (errno != 0) {
+        if (errno) {
             napi_throw_error(env_, "-1", "Invalid tid");
         }
         napi_create_int32(env_, pri, &result);
@@ -406,11 +402,11 @@ namespace OHOS::Js_sys_module::Process {
         struct timespec timessys = {0, 0};
         napi_value result = nullptr;
         auto res = clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &timespro);
-        if (res != 0) {
+        if (res) {
             return 0;
         }
         auto res1 = clock_gettime(CLOCK_MONOTONIC, &timessys);
-        if (res1 != 0) {
+        if (res1) {
             return 0;
         }
         int whenpro = ConvertTime(timespro.tv_sec, timespro.tv_nsec);
@@ -430,7 +426,7 @@ namespace OHOS::Js_sys_module::Process {
         struct timespec times = {0, 0};
         napi_value result = nullptr;
         auto res = clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &times);
-        if (res != 0) {
+        if (res) {
             return 0;
         }
         int when =  ConvertTime(times.tv_sec, times.tv_nsec);
