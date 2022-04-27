@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef BASE_COMPILERUNTIME_JS_SYS_MODULE_CHILD_PROCESS_CLASS_H
-#define BASE_COMPILERUNTIME_JS_SYS_MODULE_CHILD_PROCESS_CLASS_H
+#ifndef PROCESS_JS_CHILDPROCESS_H_
+#define PROCESS_JS_CHILDPROCESS_H_
 
 #include <string>
 #include <sys/types.h>
@@ -50,18 +50,93 @@ namespace OHOS::Js_sys_module::Process {
 
     class ChildProcess {
     public:
-        explicit ChildProcess(napi_env env);
+        /**
+         * Create child process object.
+         */
+        explicit ChildProcess() {}
+
+        /**
+         * Close the target process.
+         */
         void Close();
-        void Kill(const napi_value signo);
-        napi_value Wait();
-        napi_value GetOutput() const;
-        napi_value GetErrorOutput() const;
-        napi_value GetKilled() const;
-        napi_value Getpid() const;
-        napi_value Getppid() const;
-        napi_value GetExitCode() const;
-        void InitOptionsInfo(napi_value options);
-        void Spawn(napi_value command);
+
+        /**
+         * Send a signal to process.
+         *
+         * @param env NAPI environment parameters.
+         * @param signal Number or string represents the signal sent.
+         */
+        void Kill(napi_env env, const napi_value signo);
+
+        /**
+         * Wait for the child process to finish running, and return a promise object
+         * whose value is the exit code of the child process.
+         *
+         * @param env NAPI environment parameters.
+         */
+        napi_value Wait(napi_env env);
+
+        /**
+         * Get the standard output of the child process.
+         *
+         * @param env NAPI environment parameters.
+         */
+        napi_value GetOutput(napi_env env) const;
+
+        /**
+         * Get the standard error output of the child process.
+         *
+         * @param env NAPI environment parameters.
+         */
+        napi_value GetErrorOutput(napi_env env) const;
+
+        /**
+         * Get kill status.
+         *
+         * @param env NAPI environment parameters.
+         */
+        napi_value GetKilled(napi_env env) const;
+
+        /**
+         * Get the specific pid value.
+         *
+         * @param env NAPI environment parameters.
+         */
+        napi_value Getpid(napi_env env) const;
+
+        /**
+         * Get the parent process ID.
+         *
+         * @param env NAPI environment parameters.
+         */
+        napi_value Getppid(napi_env env) const;
+
+        /**
+         * Get exit status.
+         *
+         * @param env NAPI environment parameters.
+         */
+        napi_value GetExitCode(napi_env env) const;
+
+        /**
+         * Initialization option information.
+         *
+         * @param env NAPI environment parameters.
+         * @param options Option parameter.
+         */
+        void InitOptionsInfo(napi_env env, napi_value options);
+
+        /**
+         * Start a subprocess to execute shell commands.
+         *
+         * @param env NAPI environment parameters.
+         * @param command Command parameters.
+         */
+        void Spawn(napi_env env, napi_value command);
+
+        /**
+         * ChildProcess destructor.
+         */
         virtual ~ChildProcess();
 
     private:
@@ -70,11 +145,10 @@ namespace OHOS::Js_sys_module::Process {
         static void ReadStdErr(napi_env env, void* data);
         static void EndStdErr(napi_env env, napi_status status, void* buffer);
         static void TimeoutListener(napi_env env, void* data);
-        std::string RequireStrValue(const napi_value strValue);
-        int GetValidSignal(const napi_value signo);
-        void CreateWorker();
+        std::string RequireStrValue(napi_env env, const napi_value strValue);
+        int GetValidSignal(napi_env env, const napi_value signo);
+        void CreateWorker(napi_env env);
 
-        napi_env env_ = nullptr;
         OptionsInfo* optionsInfo_ = nullptr;
         StdInfo* stdOutInfo_ = nullptr;
         StdInfo* stdErrInfo_ = nullptr;
@@ -88,5 +162,5 @@ namespace OHOS::Js_sys_module::Process {
         bool killed_ = false;
         bool isWait_ = true;
     };
-} // namespace
-#endif
+} // namespace OHOS::Js_sys_module::Process
+#endif // PROCESS_JS_CHILDPROCESS_H_

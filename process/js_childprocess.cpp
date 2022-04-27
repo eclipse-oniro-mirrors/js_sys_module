@@ -64,9 +64,7 @@ namespace OHOS::Js_sys_module::Process {
         {"SIGSYS", 31}
     };
 
-    ChildProcess::ChildProcess(napi_env env) : env_(env) {}
-
-    void ChildProcess::Spawn(napi_value command)
+    void ChildProcess::Spawn(napi_env env, napi_value command)
     {
         int ret = pipe(stdOutFd_);
         if (ret < 0) {
@@ -78,7 +76,7 @@ namespace OHOS::Js_sys_module::Process {
             HILOG_ERROR("pipe2 failed %{public}d", errno);
             return;
         }
-        std::string strCommnd = RequireStrValue(command);
+        std::string strCommnd = RequireStrValue(env, command);
         pid_t pid = fork();
         if (!pid) {
             close(stdErrFd_[0]);
@@ -90,20 +88,25 @@ namespace OHOS::Js_sys_module::Process {
                 exit(127); // 127:The parameter value
             }
         } else if (pid > 0) {
+            if (optionsInfo_ == nullptr) {
+                HILOG_ERROR("optionsInfo_ is nullptr");
+                return;
+            }
             optionsInfo_->pid = pid;
             ppid_ = getpid();
-            CreateWorker();
+            CreateWorker(env);
             napi_value resourceName = nullptr;
-            napi_create_string_utf8(env_, "TimeoutListener", strlen("TimeoutListener"), &resourceName);
+            napi_create_string_utf8(env, "TimeoutListener", strlen("TimeoutListener"), &resourceName);
             napi_create_async_work(
-                env_, nullptr, resourceName, TimeoutListener,
+                env, nullptr, resourceName, TimeoutListener,
                 [](napi_env env, napi_status status, void* data) {
                     OptionsInfo* optionsInfo = reinterpret_cast<OptionsInfo*>(data);
                     napi_delete_async_work(env, optionsInfo->worker);
                     delete optionsInfo;
+                    optionsInfo = nullptr;
                 },
                 reinterpret_cast<void*>(optionsInfo_), &optionsInfo_->worker);
-            napi_queue_async_work(env_, optionsInfo_->worker);
+            napi_queue_async_work(env, optionsInfo_->worker);
             close(stdErrFd_[1]);
             close(stdOutFd_[1]);
         } else {
@@ -111,128 +114,164 @@ namespace OHOS::Js_sys_module::Process {
         }
     }
 
-    napi_value ChildProcess::Wait()
+    napi_value ChildProcess::Wait(napi_env env)
     {
         napi_value promise = nullptr;
         auto waitInfo = new WaitInfo;
-        napi_create_promise(env_, &(waitInfo->deferred), &promise);
+        napi_create_promise(env, &(waitInfo->deferred), &promise);
 
         if (isWait_) {
             int32_t status;
             isWait_ = false;
+            if (optionsInfo_ == nullptr) {
+                napi_value res = nullptr;
+                NAPI_CALL(env, napi_get_undefined(env, &res));
+                HILOG_ERROR("optionsInfo_ is nullptr");
+                return res;
+            }
             waitpid(optionsInfo_->pid, &status, 0);
             exitCode_ = status;
         }
         isNeedRun_ = false;
         napi_value result = nullptr;
-        napi_create_int32(env_, static_cast<int8_t>(exitCode_), &result);
-        napi_resolve_deferred(env_, waitInfo->deferred, result);
+        napi_create_int32(env, static_cast<int8_t>(exitCode_), &result);
+        napi_resolve_deferred(env, waitInfo->deferred, result);
         delete waitInfo;
         waitInfo = nullptr;
 
         return promise;
     }
 
-    napi_value ChildProcess::GetOutput() const
+    napi_value ChildProcess::GetOutput(napi_env env) const
     {
-        NAPI_CALL(env_, napi_create_promise(env_, &stdOutInfo_->deferred, &stdOutInfo_->promise));
+        if (stdOutInfo_ == nullptr) {
+            napi_value res = nullptr;
+            NAPI_CALL(env, napi_get_undefined(env, &res));
+            HILOG_ERROR("stdOutInfo_ is nullptr");
+            return res;
+        }
+        NAPI_CALL(env, napi_create_promise(env, &stdOutInfo_->deferred, &stdOutInfo_->promise));
         void* data = nullptr;
         napi_value arrayBuffer = nullptr;
         size_t bufferSize = stdOutInfo_->stdData.size() + 1;
-        NAPI_CALL(env_, napi_create_arraybuffer(env_, bufferSize, &data, &arrayBuffer));
+        NAPI_CALL(env, napi_create_arraybuffer(env, bufferSize, &data, &arrayBuffer));
         if (memcpy_s(data, bufferSize, reinterpret_cast<const void*>(stdOutInfo_->stdData.c_str()),
             stdOutInfo_->stdData.size()) != EOK) {
             HILOG_ERROR("getOutput memcpy_s failed");
-            NAPI_CALL(env_, napi_delete_async_work(env_, stdOutInfo_->worker));
+            NAPI_CALL(env, napi_delete_async_work(env, stdOutInfo_->worker));
             napi_value res = nullptr;
-            NAPI_CALL(env_, napi_get_undefined(env_, &res));
+            NAPI_CALL(env, napi_get_undefined(env, &res));
             return res;
         }
 
         napi_value result = nullptr;
-        NAPI_CALL(env_, napi_create_typedarray(env_, napi_uint8_array, bufferSize, arrayBuffer, 0, &result));
-        NAPI_CALL(env_, napi_resolve_deferred(env_, stdOutInfo_->deferred, result));
+        NAPI_CALL(env, napi_create_typedarray(env, napi_uint8_array, bufferSize, arrayBuffer, 0, &result));
+        NAPI_CALL(env, napi_resolve_deferred(env, stdOutInfo_->deferred, result));
         return stdOutInfo_->promise;
     }
 
-    napi_value ChildProcess::GetErrorOutput() const
+    napi_value ChildProcess::GetErrorOutput(napi_env env) const
     {
-        NAPI_CALL(env_, napi_create_promise(env_, &stdErrInfo_->deferred, &stdErrInfo_->promise));
+        if (stdErrInfo_ == nullptr) {
+            napi_value res = nullptr;
+            NAPI_CALL(env, napi_get_undefined(env, &res));
+            HILOG_ERROR("stdErrInfo_ is nullptr");
+            return res;
+        }
+        NAPI_CALL(env, napi_create_promise(env, &stdErrInfo_->deferred, &stdErrInfo_->promise));
         void* data = nullptr;
         napi_value arrayBuffer = nullptr;
         size_t bufferSize = stdErrInfo_->stdData.size() + 1;
-        NAPI_CALL(env_, napi_create_arraybuffer(env_, bufferSize, &data, &arrayBuffer));
+        NAPI_CALL(env, napi_create_arraybuffer(env, bufferSize, &data, &arrayBuffer));
         if (memcpy_s(data, bufferSize, reinterpret_cast<const void*>(stdErrInfo_->stdData.c_str()),
             stdErrInfo_->stdData.size()) != EOK) {
             HILOG_ERROR("getErrOutput memcpy_s failed");
-            NAPI_CALL(env_, napi_delete_async_work(env_, stdErrInfo_->worker));
+            NAPI_CALL(env, napi_delete_async_work(env, stdErrInfo_->worker));
             napi_value res = nullptr;
-            NAPI_CALL(env_, napi_get_undefined(env_, &res));
+            NAPI_CALL(env, napi_get_undefined(env, &res));
             return res;
         }
 
         napi_value result = nullptr;
-        NAPI_CALL(env_, napi_create_typedarray(env_, napi_uint8_array, bufferSize, arrayBuffer, 0, &result));
-        NAPI_CALL(env_, napi_resolve_deferred(env_, stdErrInfo_->deferred, result));
+        NAPI_CALL(env, napi_create_typedarray(env, napi_uint8_array, bufferSize, arrayBuffer, 0, &result));
+        NAPI_CALL(env, napi_resolve_deferred(env, stdErrInfo_->deferred, result));
         return stdErrInfo_->promise;
     }
 
-    napi_value ChildProcess::GetKilled() const
+    napi_value ChildProcess::GetKilled(napi_env env) const
     {
         napi_value result = nullptr;
-        NAPI_CALL(env_, napi_get_boolean(env_, killed_, &result));
+        NAPI_CALL(env, napi_get_boolean(env, killed_, &result));
 
         return result;
     }
 
-    napi_value ChildProcess::Getpid() const
+    napi_value ChildProcess::Getpid(napi_env env) const
     {
         napi_value result = nullptr;
-        NAPI_CALL(env_, napi_create_int32(env_, optionsInfo_->pid, &result));
+        if (optionsInfo_ == nullptr) {
+            napi_value res = nullptr;
+            NAPI_CALL(env, napi_get_undefined(env, &res));
+            HILOG_ERROR("optionsInfo_ is nullptr");
+            return res;
+        }
+        NAPI_CALL(env, napi_create_int32(env, optionsInfo_->pid, &result));
 
         return result;
     }
 
-    napi_value ChildProcess::Getppid() const
+    napi_value ChildProcess::Getppid(napi_env env) const
     {
         napi_value result = nullptr;
-        NAPI_CALL(env_, napi_create_int32(env_, ppid_, &result));
+        NAPI_CALL(env, napi_create_int32(env, ppid_, &result));
 
         return result;
     }
 
-    napi_value ChildProcess::GetExitCode() const
+    napi_value ChildProcess::GetExitCode(napi_env env) const
     {
         napi_value result = nullptr;
-        NAPI_CALL(env_, napi_create_int32(env_, static_cast<int8_t>(exitCode_), &result));
+        NAPI_CALL(env, napi_create_int32(env, static_cast<int8_t>(exitCode_), &result));
 
         return result;
     }
 
-    void ChildProcess::CreateWorker()
+    void ChildProcess::CreateWorker(napi_env env)
     {
         // getstdout
         napi_value resourceName = nullptr;
         stdOutInfo_ = new StdInfo();
+        if (stdOutInfo_ == nullptr) {
+            HILOG_ERROR("stdOutInfo_ is nullptr");
+            return;
+        }
         stdOutInfo_->isNeedRun = &isNeedRun_;
         stdOutInfo_->fd = stdOutFd_[0];
+        if (optionsInfo_ == nullptr) {
+            HILOG_ERROR("optionsInfo_ is nullptr");
+            return;
+        }
         stdOutInfo_->pid = optionsInfo_->pid;
         stdOutInfo_->maxBuffSize = optionsInfo_->maxBuffer;
-        napi_create_string_utf8(env_, "ReadStdOut", NAPI_AUTO_LENGTH, &resourceName);
-        napi_create_async_work(env_, nullptr, resourceName, ReadStdOut, EndStdOut,
+        napi_create_string_utf8(env, "ReadStdOut", NAPI_AUTO_LENGTH, &resourceName);
+        napi_create_async_work(env, nullptr, resourceName, ReadStdOut, EndStdOut,
                                reinterpret_cast<void*>(stdOutInfo_), &stdOutInfo_->worker);
-        napi_queue_async_work(env_, stdOutInfo_->worker);
+        napi_queue_async_work(env, stdOutInfo_->worker);
 
         // getstderr
         stdErrInfo_ = new StdInfo();
+        if (stdErrInfo_ == nullptr) {
+            HILOG_ERROR("stdErrInfo_ is nullptr");
+            return;
+        }
         stdErrInfo_->isNeedRun = &isNeedRun_;
         stdErrInfo_->fd = stdErrFd_[0];
         stdErrInfo_->pid = optionsInfo_->pid;
         stdErrInfo_->maxBuffSize = optionsInfo_->maxBuffer;
-        napi_create_string_utf8(env_, "ReadStdErr", NAPI_AUTO_LENGTH, &resourceName);
-        napi_create_async_work(env_, nullptr, resourceName, ReadStdErr, EndStdErr,
+        napi_create_string_utf8(env, "ReadStdErr", NAPI_AUTO_LENGTH, &resourceName);
+        napi_create_async_work(env, nullptr, resourceName, ReadStdErr, EndStdErr,
                                reinterpret_cast<void*>(stdErrInfo_), &stdErrInfo_->worker);
-        napi_queue_async_work(env_, stdErrInfo_->worker);
+        napi_queue_async_work(env, stdErrInfo_->worker);
     }
 
     void ChildProcess::ReadStdOut(napi_env env, void* data)
@@ -267,6 +306,7 @@ namespace OHOS::Js_sys_module::Process {
         auto stdOutInfo = reinterpret_cast<StdInfo*>(buffer);
         napi_delete_async_work(env, stdOutInfo->worker);
         delete stdOutInfo;
+        stdOutInfo = nullptr;
     }
 
     void ChildProcess::ReadStdErr(napi_env env, void* data)
@@ -301,18 +341,19 @@ namespace OHOS::Js_sys_module::Process {
         auto stdErrInfo = reinterpret_cast<StdInfo*>(buffer);
         napi_delete_async_work(env, stdErrInfo->worker);
         delete stdErrInfo;
+        stdErrInfo = nullptr;
     }
 
-    int ChildProcess::GetValidSignal(const napi_value signo)
+    int ChildProcess::GetValidSignal(napi_env env, const napi_value signo)
     {
         int32_t sig = 0;
         napi_valuetype valuetype = napi_undefined;
-        napi_typeof(env_, signo, &valuetype);
+        napi_typeof(env, signo, &valuetype);
         if (valuetype == napi_valuetype::napi_number) {
-            napi_get_value_int32(env_, signo, &sig);
+            napi_get_value_int32(env, signo, &sig);
             return sig;
         } else if (valuetype == napi_valuetype::napi_string) {
-            std::string buffer = RequireStrValue(signo);
+            std::string buffer = RequireStrValue(env, signo);
             auto iter = g_signalsMap.find(buffer);
             if (iter != g_signalsMap.end()) {
                 sig = iter->second;
@@ -325,10 +366,14 @@ namespace OHOS::Js_sys_module::Process {
         }
     }
 
-    void ChildProcess::Kill(const napi_value signo)
+    void ChildProcess::Kill(napi_env env, const napi_value signo)
     {
-        int signal = GetValidSignal(signo);
+        int signal = GetValidSignal(env, signo);
         std::vector<int32_t> signalType = {SIGINT, SIGQUIT, SIGKILL, SIGTERM};
+        if (optionsInfo_ == nullptr) {
+            HILOG_ERROR("optionsInfo_ is nullptr");
+            return;
+        }
         if (!kill(optionsInfo_->pid, signal)) {
             auto res = std::find(signalType.begin(), signalType.end(), static_cast<int32_t>(signal));
             (res != signalType.end()) ? isNeedRun_ = false : 0;
@@ -341,6 +386,10 @@ namespace OHOS::Js_sys_module::Process {
     void ChildProcess::Close()
     {
         int32_t status = 0;
+        if (optionsInfo_ == nullptr) {
+            HILOG_ERROR("optionsInfo_ is nullptr");
+            return;
+        }
         if (isWait_ && !(waitpid(optionsInfo_->pid, &status, WNOHANG)) && isNeedRun_) {
             if (!kill(optionsInfo_->pid, SIGKILL)) {
                 waitpid(optionsInfo_->pid, &status, 0);
@@ -371,27 +420,31 @@ namespace OHOS::Js_sys_module::Process {
         }
     }
 
-    void ChildProcess::InitOptionsInfo(napi_value options)
+    void ChildProcess::InitOptionsInfo(napi_env env, napi_value options)
     {
         std::vector<std::string> keyStr = {"timeout", "killSignal", "maxBuffer"};
         optionsInfo_ = new OptionsInfo();
+        if (optionsInfo_ == nullptr) {
+            HILOG_ERROR("optionsInfo_ is nullptr");
+            return;
+        }
         size_t size = keyStr.size();
         for (size_t i = 0; i < size; i++) {
             napi_status status = napi_ok;
             napi_value property = nullptr;
-            napi_get_named_property(env_, options, keyStr[i].c_str(), &property);
+            napi_get_named_property(env, options, keyStr[i].c_str(), &property);
             switch (i) {
                 case 0:
-                    status = napi_get_value_int32(env_, property, &optionsInfo_->timeout);
+                    status = napi_get_value_int32(env, property, &optionsInfo_->timeout);
                     if (status != napi_ok) {
                         optionsInfo_->timeout = 0;
                     }
                     break;
                 case 1:
-                    optionsInfo_->killSignal = GetValidSignal(property);
+                    optionsInfo_->killSignal = GetValidSignal(env, property);
                     break;
                 case 2: // 2:The parameter value
-                    status = napi_get_value_int64(env_, property, &optionsInfo_->maxBuffer);
+                    status = napi_get_value_int64(env, property, &optionsInfo_->maxBuffer);
                     if (status != napi_ok) {
                         optionsInfo_->maxBuffer = static_cast<int64_t>(MAXSIZE) * static_cast<int64_t>(MAXSIZE);
                     }
@@ -403,19 +456,19 @@ namespace OHOS::Js_sys_module::Process {
         optionsInfo_->isNeedRun = &isNeedRun_;
     }
 
-    std::string ChildProcess::RequireStrValue(const napi_value strValue)
+    std::string ChildProcess::RequireStrValue(napi_env env, const napi_value strValue)
     {
         size_t bufferSize = 0;
-        if (napi_get_value_string_utf8(env_, strValue, nullptr, 0, &bufferSize) != napi_ok) {
+        if (napi_get_value_string_utf8(env, strValue, nullptr, 0, &bufferSize) != napi_ok) {
             HILOG_ERROR("can not get strValue size");
-            return "";
+            return nullptr;
         }
         std::string result = "";
         result.reserve(bufferSize + 1);
         result.resize(bufferSize);
-        if (napi_get_value_string_utf8(env_, strValue, result.data(), bufferSize + 1, &bufferSize) != napi_ok) {
+        if (napi_get_value_string_utf8(env, strValue, result.data(), bufferSize + 1, &bufferSize) != napi_ok) {
             HILOG_ERROR("can not get strValue value");
-            return "";
+            return nullptr;
         }
         return result;
     }
@@ -430,4 +483,4 @@ namespace OHOS::Js_sys_module::Process {
         }
         isNeedRun_ = false;
     }
-} // namespace
+} // namespace OHOS::Js_sys_module::Process
